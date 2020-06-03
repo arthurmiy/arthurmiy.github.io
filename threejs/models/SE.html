@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>three.js webgl - FBX loader</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link type="text/css" rel="stylesheet" href="main.css">
+
+		<style>
+			html, body {
+				margin: 0;
+				height: 100%;
+			}
+			canvas {
+			  width: 100%;
+			  height: 100%;
+			  display: block;
+			  position: fixed;
+			  top: 0;
+			  left: 0;
+			  z-index: -9999;
+			}
+		  </style>
+
+	</head>
+
+	<body>
+		
+		
+
+		<script src="./tween.js"></script>
+
+		<script type="module">
+
+			import * as THREE from '../build/three.module.js';
+
+
+
+			import Stats from './jsm/libs/stats.module.js';
+
+			import { OrbitControls } from './jsm/controls/OrbitControls.js';
+			import { FBXLoader } from './jsm/loaders/FBXLoader.js';
+
+			var container, stats, controls;
+			var camera, scene, renderer, light;
+
+			var clock = new THREE.Clock();
+
+			var mixer;
+
+			
+
+
+
+
+
+
+
+
+
+
+
+			
+
+document.getElementById("move").onclick = move;	
+document.getElementById("stop").onclick = stop;	
+
+var tween;
+
+
+
+//.........................................
+
+
+var posX ;
+var posY ;
+var posZ ;
+
+var canvas = document.querySelector("canvas");
+
+
+
+
+
+			init();
+			animate();
+
+			function init() {
+
+				container = document.createElement( 'div' );
+				document.body.appendChild( container );
+
+				camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 80000 );
+				camera.position.set(  1000, 2000, 3000 );
+				camera.lookAt(0,100,0);
+
+				posX = camera.position.x + 100;
+				posY = camera.position.y + 100;
+				posZ = camera.position.z + 200;
+
+				scene = new THREE.Scene();
+				//scene.background = new THREE.Color( 0xa0a0a0 );
+				//scene.fog = new THREE.Fog( 0xa0a0a0, 200, 1000 );
+
+				light = new THREE.HemisphereLight( 0xffffff, 0x444444 );
+				light.position.set( 0, 500, 200 );
+				scene.add( light );
+
+				light = new THREE.DirectionalLight( 0xffffff );
+				light.position.set( 0, 200, 100 );
+				//light.castShadow = true;
+				//light.shadow.camera.top = 180;
+				//light.shadow.camera.bottom = - 100;
+				//light.shadow.camera.left = - 120;
+				//light.shadow.camera.right = 120;
+				//scene.add( light );
+
+				// scene.add( new CameraHelper( light.shadow.camera ) );
+
+				// ground
+				var mesh = new THREE.Mesh( new THREE.PlaneBufferGeometry( 2000, 2000 ), new THREE.MeshPhongMaterial( { color: 0x999999, depthWrite: false } ) );
+				mesh.rotation.x = - Math.PI / 2;
+				mesh.receiveShadow = true;
+				scene.add( mesh );
+
+				var grid = new THREE.GridHelper( 2000, 20, 0x000000, 0x000000 );
+				grid.material.opacity = 0.2;
+				grid.material.transparent = true;
+				scene.add( grid );
+
+				// model
+				var loader = new FBXLoader();
+				loader.load( 'se.fbx', function ( object ) {
+
+					//mixer = new THREE.AnimationMixer( object );
+
+					//var action = mixer.clipAction( object.animations[ 0 ] );
+					//action.play();
+
+					object.traverse( function ( child ) {
+
+						if ( child.isMesh ) {
+
+							child.castShadow = true;
+							child.receiveShadow = true;
+							
+						}
+
+					} );
+
+					scene.add( object );
+
+				} );
+
+				
+
+				renderer = new THREE.WebGLRenderer( { antialias: true, canvas: canvas } );
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				renderer.shadowMap.enabled = true;
+				container.appendChild( renderer.domElement );
+
+				controls = new OrbitControls( camera, renderer.domElement );
+				//controls.target.set( 0, 100, 0 );
+				camera.lookAt(50,100,60);
+				controls.update();
+
+				window.addEventListener( 'resize', onWindowResize, false );
+
+				// stats
+				stats = new Stats();
+				container.appendChild( stats.dom );
+
+			}
+
+			function onWindowResize() {
+
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+
+				renderer.setSize( window.innerWidth, window.innerHeight );
+
+			}
+
+			//
+
+
+			function resize() {
+  var width = canvas.clientWidth;
+  var height = canvas.clientHeight;
+  if (width != canvas.width || height != canvas.height) {
+    renderer.setSize(width, height, false);
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+  }
+}
+
+
+
+
+			function move( ) {
+				var from = {
+					x: camera.position.x,
+					y: camera.position.y,
+					z: camera.position.z
+				};
+
+				var to = {
+					x: posX,
+					y: posY,
+					z: posZ
+				};
+				
+				tween = new TWEEN.Tween(from)   
+					.to( to, 3000 )
+					.easing( TWEEN.Easing.Linear.None ) // TWEEN.Easing.Quadratic.InOut ...
+					.onUpdate( function ( ) {		
+						camera.position.set( from.x, from.y, from.z );
+						camera.lookAt(new THREE.Vector3( 0, 45, 0 ) );
+						} )	
+				.start( );
+			}
+
+			function stop( ) {
+
+				tween.stop();
+				
+			}
+
+			function animate( ) {
+				
+				requestAnimationFrame(animate);   
+				TWEEN.update();
+				controls.update();
+				renderer.render(scene, camera);
+				
+			}
+
+
+	
+
+		</script>
+
+<canvas></canvas>
+<button id="move">camera home</button>
+		<button id="stop">camera stop</button>
+	</body>
+</html>

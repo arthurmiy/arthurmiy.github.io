@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>three.js webgl - FBX loader</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+        <style>
+            #threeD {
+                z-index : -9999;
+                position: absolute;
+                top : 0;
+                left    : 0;
+                width: 100vw;
+                height: 100vh;
+                overflow: hidden;
+                margin  : 0;
+                padding : 0;
+            }
+            </style>
+
+
+		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+		<link href="http://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700,800" rel="stylesheet" type="text/css" />
+		<!--[if lte IE 8]><script src="js/html5shiv.js"></script><![endif]-->
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+		<script src="js/skel.min.js"></script>
+		<script src="js/skel-panels.min.js"></script>
+		<script src="js/init.js"></script>
+		<noscript>
+			<link rel="stylesheet" href="css/skel-noscript.css" />
+			<link rel="stylesheet" href="css/style.css" />
+			<link rel="stylesheet" href="css/style-desktop.css" />
+        </noscript>
+        
+     
+	</head>
+
+
+    
+
+
+
+
+
+
+	<body class="homepage">
+        <div class="threeD" id="container"></div>
+        <script src="./tween.js"></script>
+
+		<script type="module">
+			import * as THREE from '../build/three.module.js';
+			import { OrbitControls } from './jsm/controls/OrbitControls.js';
+			import { FBXLoader } from './jsm/loaders/FBXLoader.js';
+			var container, stats, controls;
+			var camera, scene, renderer, light;
+			var clock = new THREE.Clock();
+			var mixer;
+
+            document.getElementById("btn1").onclick = move1;	
+            document.getElementById("btn2").onclick = move2;	
+            document.getElementById("btn3").onclick = move3;
+
+            var tween;
+//.........................................
+            var posX ;
+            var posY ;
+            var posZ ;
+
+            var controlTarget;
+            
+			init();
+			animate();
+
+			function init() {
+				container = document.getElementById( 'container' );
+				document.body.appendChild( container );
+
+				camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 80000 );
+				camera.position.set(  1000, 2000, 3000 );
+       
+
+				posX = camera.position.x + 1;
+				posY = camera.position.y + 1;
+				posZ = camera.position.z + 2;
+                controlTarget = camera.controlTarget;
+
+				scene = new THREE.Scene();
+
+				light = new THREE.HemisphereLight( 0xffffff, 0x444444 );
+				light.position.set( 0, 500, 200 );
+				scene.add( light );
+
+				// ground
+				var mesh = new THREE.Mesh( new THREE.PlaneBufferGeometry( 2000, 2000 ), new THREE.MeshPhongMaterial( { color: 0x999999, depthWrite: false } ) );
+				mesh.rotation.x = - Math.PI / 2;
+				mesh.receiveShadow = true;
+				scene.add( mesh );
+
+				var grid = new THREE.GridHelper( 2000, 20, 0x000000, 0x000000 );
+				grid.material.opacity = 0.2;
+				grid.material.transparent = true;
+				scene.add( grid );
+
+				// model
+				var loader = new FBXLoader();
+				loader.load( 'se.fbx', function ( object ) {
+					object.traverse( function ( child ) {
+						if ( child.isMesh ) {
+							child.castShadow = true;
+							child.receiveShadow = true;
+						}
+
+					} );
+					scene.add( object );
+				} );
+
+				renderer = new THREE.WebGLRenderer( { antialias: true } );
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				renderer.shadowMap.enabled = true;
+				container.appendChild( renderer.domElement );
+
+				controls = new OrbitControls( camera, renderer.domElement );
+				controls.update();
+				window.addEventListener( 'resize', onWindowResize, false );
+
+				// stats
+				//stats = new Stats();
+				//container.appendChild( stats.dom );
+
+			}
+
+			function onWindowResize() {
+
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+
+				renderer.setSize( window.innerWidth, window.innerHeight );
+
+			}
+
+			//
+
+
+			
+
+			function move1( ) {
+           
+                
+                console.log("POSITION X")
+                console.log(camera.position.x);
+                console.log("POSITION Y")
+                console.log(camera.position.y);
+                console.log("POSITION Z")
+                console.log(camera.position.z);
+                console.log("TARGET X")
+                console.log(controls.target.x);
+                console.log("TARGET Y")
+                console.log(controls.target.y);
+                console.log("TARGET Z")
+                console.log(controls.target.z);
+
+
+
+                
+				var from = {
+					x: camera.position.x,
+					y: camera.position.y,
+					z: camera.position.z,
+                    rx: controls.target.x,
+					ry: controls.target.y,
+					rz: controls.target.z,
+				};
+
+				var to = {
+					x: -927.8549647234763,
+					y: 462.52404407311315,
+					z: -3390.891268232134,
+                    rx: -944.3785473937126,
+					ry: 0,
+					rz: -1198.951170147871,
+				};
+				
+				tween = new TWEEN.Tween(from)   
+					.to( to, 3000 )
+					.easing( TWEEN.Easing.Linear.None ) // TWEEN.Easing.Quadratic.InOut ...
+					.onUpdate( function ( ) {		
+                        //camera.lookAt(new THREE.Vector3( 0, 0, 0 ) );
+						camera.position.set( from.x, from.y, from.z );
+                        //camera.controlTarget.set(from.tx,from.ty,from.tz);
+						controls.target.set ( from.rx, from.ry, from.rz );
+                        
+						} )	
+				.start( );
+			}
+
+
+            function move2( ) {
+           
+                
+           console.log("POSITION X")
+           console.log(camera.position.x);
+           console.log("POSITION Y")
+           console.log(camera.position.y);
+           console.log("POSITION Z")
+           console.log(camera.position.z);
+           console.log("TARGET X")
+           console.log(controls.target.x);
+           console.log("TARGET Y")
+           console.log(controls.target.y);
+           console.log("TARGET Z")
+           console.log(controls.target.z);
+
+
+
+           
+           var from = {
+               x: camera.position.x,
+               y: camera.position.y,
+               z: camera.position.z,
+               rx: controls.target.x,
+               ry: controls.target.y,
+               rz: controls.target.z,
+           };
+
+           var to = {
+               x: 385.8299879178612,
+               y: 405.00541934227385,
+               z: -3331.983370597776,
+               rx: -1060.4555577892074,
+               ry: 0,
+               rz: -1822.174142507929,
+           };
+           
+           tween = new TWEEN.Tween(from)   
+               .to( to, 3000 )
+               .easing( TWEEN.Easing.Linear.None ) // TWEEN.Easing.Quadratic.InOut ...
+               .onUpdate( function ( ) {		
+                   //camera.lookAt(new THREE.Vector3( 0, 0, 0 ) );
+                   camera.position.set( from.x, from.y, from.z );
+                   //camera.controlTarget.set(from.tx,from.ty,from.tz);
+                   controls.target.set ( from.rx, from.ry, from.rz );
+                   
+                   } )	
+           .start( );
+       }
+
+
+
+       function move3( ) {
+           
+                
+           console.log("POSITION X")
+           console.log(camera.position.x);
+           console.log("POSITION Y")
+           console.log(camera.position.y);
+           console.log("POSITION Z")
+           console.log(camera.position.z);
+           console.log("TARGET X")
+           console.log(controls.target.x);
+           console.log("TARGET Y")
+           console.log(controls.target.y);
+           console.log("TARGET Z")
+           console.log(controls.target.z);
+
+
+
+           
+           var from = {
+               x: camera.position.x,
+               y: camera.position.y,
+               z: camera.position.z,
+               rx: controls.target.x,
+               ry: controls.target.y,
+               rz: controls.target.z,
+           };
+
+           var to = {
+               x: 174.34000214217627,
+               y: 493.8231872653976,
+               z: -3197.3575817586516,
+               rx: -459.47341568328665,
+               ry: 0,
+               rz: -3182.326622995694,
+           };
+           
+           tween = new TWEEN.Tween(from)   
+               .to( to, 3000 )
+               .easing( TWEEN.Easing.Linear.None ) // TWEEN.Easing.Quadratic.InOut ...
+               .onUpdate( function ( ) {		
+                   //camera.lookAt(new THREE.Vector3( 0, 0, 0 ) );
+                   camera.position.set( from.x, from.y, from.z );
+                   //camera.controlTarget.set(from.tx,from.ty,from.tz);
+                   controls.target.set ( from.rx, from.ry, from.rz );
+                   
+                   } )	
+           .start( );
+       }
+
+
+
+			function stop( ) {
+
+				tween.stop();
+				
+			}
+
+			function animate( ) {
+				
+				requestAnimationFrame(animate);   
+				TWEEN.update();
+				controls.update();
+				renderer.render(scene, camera);
+				
+			}
+
+		</script>
+
+
+
+
+
+
+<div id="featured-wrapper">
+			
+    <div class="container">
+        <div class="row double">
+        
+            <section class="4u">
+               <header>
+                   <h2>Área 1</h2>
+               </header>
+                <span class="pennant"><span class="fa fa-flash"></span></span>
+                <p>Curabitur sit amet nulla. Nam in massa. Sed vel tellus. Curabitur sem urna, consequat vel, suscipit in, mattis placerat, nulla. Sed ac leo.</p>
+                <button id="btn1" class="button button-style1">Read More</a>
+            </section>
+            <section class="4u">
+                <header>
+                    <h2>Área 2</h2>
+                </header>
+                <span class="pennant"><span class="fa fa-check-circle"></span></span>
+                <p>Donec ornare neque ac sem. Mauris aliquet. Aliquam sem leo, vulputate sed, convallis at, ultricies quis, justo. Donec nonummy magna.</p>
+                <button id="btn2" class="button button-style1">Read More</a>
+            </section>
+            <section class="4u">
+                <header>
+                    <h2>Área 3</h2>
+                </header>
+                <span class="pennant"><span class="fa fa-cogs"></span></span>
+                <p>Curabitur sit amet nulla. Nam in massa. Sed vel tellus. Curabitur sem urna, consequat vel, suscipit in, mattis placerat, nulla. Sed ac leo.</p>
+                <button id="btn3" class="button button-style1">Read More</a>
+            </section>
+          
+        
+        </div>
+    </div>
+    
+</div>
+
+        
+
+
+        
+
+       
+
+	</body>
+</html>

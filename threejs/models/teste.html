@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>three.js webgl - FBX loader</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+        <style>
+            iframe {
+                z-index : -9999;
+                position: absolute;
+                top : 0;
+                left    : 0;
+                width: 100vw;
+                height: 100vh;
+                overflow: hidden;
+                margin  : 0;
+                padding : 0;
+            }
+            </style>
+
+
+		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+		<link href="http://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700,800" rel="stylesheet" type="text/css" />
+		<!--[if lte IE 8]><script src="js/html5shiv.js"></script><![endif]-->
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+		<script src="js/skel.min.js"></script>
+		<script src="js/skel-panels.min.js"></script>
+		<script src="js/init.js"></script>
+		<noscript>
+			<link rel="stylesheet" href="css/skel-noscript.css" />
+			<link rel="stylesheet" href="css/style.css" />
+			<link rel="stylesheet" href="css/style-desktop.css" />
+		</noscript>
+	</head>
+
+	<body class="homepage">
+        <div id="featured-wrapper">
+			
+            <div class="container">
+                <div class="row double">
+                
+                    <section class="4u">
+                       <header>
+                           <h2>Área 1</h2>
+                       </header>
+                        <span class="pennant"><span class="fa fa-flash"></span></span>
+                        <p>Curabitur sit amet nulla. Nam in massa. Sed vel tellus. Curabitur sem urna, consequat vel, suscipit in, mattis placerat, nulla. Sed ac leo.</p>
+                        <button id="btn1" class="button button-style1">Read More</a>
+                    </section>
+                    <section class="4u">
+                        <header>
+                            <h2>Área 2</h2>
+                        </header>
+                        <span class="pennant"><span class="fa fa-check-circle"></span></span>
+                        <p>Donec ornare neque ac sem. Mauris aliquet. Aliquam sem leo, vulputate sed, convallis at, ultricies quis, justo. Donec nonummy magna.</p>
+                        <button id="btn2" class="button button-style1">Read More</a>
+                    </section>
+                    <section class="4u">
+                        <header>
+                            <h2>Área 3</h2>
+                        </header>
+                        <span class="pennant"><span class="fa fa-cogs"></span></span>
+                        <p>Curabitur sit amet nulla. Nam in massa. Sed vel tellus. Curabitur sem urna, consequat vel, suscipit in, mattis placerat, nulla. Sed ac leo.</p>
+                        <button id="btn3" class="button button-style1">Read More</a>
+                    </section>
+                  
+                
+                </div>
+            </div>
+            
+        </div>
+        <iframe id="frame1" src="./SE2.html">
+            <script>
+                move = window.parent.moveCam();
+            </script>
+        </iframe>
+
+        <script type="text/javascript">
+            document.getElementById("btn1").onclick = document.getElementById('frame1').contentWindow.move();
+         //   document.getElementById("btn2").onclick = document.getElementById('frame1').contentWindow.move();
+         //   document.getElementById("btn3").onclick = document.getElementById('frame1').contentWindow.move();
+
+         function getIframeWindow(iframe_object) {
+  var doc;
+
+  if (iframe_object.contentWindow) {
+    return iframe_object.contentWindow;
+  }
+
+  if (iframe_object.window) {
+    return iframe_object.window;
+  } 
+
+  if (!doc && iframe_object.contentDocument) {
+    doc = iframe_object.contentDocument;
+  } 
+
+  if (!doc && iframe_object.document) {
+    doc = iframe_object.document;
+  }
+
+  if (doc && doc.defaultView) {
+   return doc.defaultView;
+  }
+
+  if (doc && doc.parentWindow) {
+    return doc.parentWindow;
+  }
+
+  return undefined;
+}
+
+var el = document.getElementById('frame1');
+
+var frame_win = getIframeWindow(el);
+
+var move;
+
+if (frame_win) {
+  //move=frame_win.moveCam();
+  
+}
+
+        </script>
+
+
+        
+
+       
+
+	</body>
+</html>
