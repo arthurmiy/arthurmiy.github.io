@@ -30,7 +30,18 @@
 			<link rel="stylesheet" href="css/skel-noscript.css" />
 			<link rel="stylesheet" href="css/style.css" />
 			<link rel="stylesheet" href="css/style-desktop.css" />
-		</noscript>
+        </noscript>
+        <script language="javascript">
+            function callfunc() {
+                setTimeout('callfunc2()', 50);
+            }
+
+            function callfunc2() {
+               // top.frames["frame1"].moveCam();
+                document.getElementById("frame1").contentWindow.moveCam();
+                return;
+            }
+        </script>
 	</head>
 
 	<body class="homepage">
@@ -69,16 +80,24 @@
             </div>
             
         </div>
-        <iframe id="frame1" src="./SE2.html">
+        <iframe id="frame1" name="frame1" src="./SE2.html">
             <script>
-                move = window.parent.moveCam();
+                parent.document.getElementById("frame1");
             </script>
         </iframe>
 
         <script type="text/javascript">
-            document.getElementById("btn1").onclick = document.getElementById('frame1').contentWindow.move();
+        //callfunc();
+            // document.getElementById("btn1").onclick = document.getElementById('frame1').contentWindow.move();
+             document.getElementById("btn1").onclick = callfunc;
          //   document.getElementById("btn2").onclick = document.getElementById('frame1').contentWindow.move();
          //   document.getElementById("btn3").onclick = document.getElementById('frame1').contentWindow.move();
+
+
+         function teste() {
+             document.getElementById('frame1').contentWindow.moveCam    ();
+         }
+
 
          function getIframeWindow(iframe_object) {
   var doc;

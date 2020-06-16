@@ -1,47 +1,56 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>three.js webgl - FBX loader</title>
+    <title>Modelo 3D - Subestação</title>
     <meta charset="utf-8" />
     <meta
       name="viewport"
       content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
     />
-    <script>
-      window.moveCam = function () {
-        console.log("hahaha");
-      };
-    </script>
+    <link rel="stylesheet" href="./css/main.css" />
   </head>
 
   <body>
-    <!-- <button id="move">camera home</button>
-		<button id="stop">camera stop</button> -->
-    <script src="./tween.js"></script>
+    <iframe
+      id="frame1"
+      name="frame1"
+      class="iframe_content"
+      scrolling="no"
+      src="./main.html"
+    >
+    </iframe>
 
+    <script src="../tween.js"></script>
     <script type="module">
-      import * as THREE from "../build/three.module.js";
-      //import Stats from './jsm/libs/stats.module.js';
-      import { OrbitControls } from "./jsm/controls/OrbitControls.js";
-      import { FBXLoader } from "./jsm/loaders/FBXLoader.js";
+      //Import scripts
+      import * as THREE from "../../build/three.module.js";
+      import { OrbitControls } from "../jsm/controls/OrbitControls.js";
+      import { FBXLoader } from "../jsm/loaders/FBXLoader.js";
+
       var container, stats, controls;
       var camera, scene, renderer, light;
       var clock = new THREE.Clock();
       var mixer;
-
-      // document.getElementById("move").onclick = move;
-      // document.getElementById("stop").onclick = stop;
-
       var tween;
-      //.........................................
       var posX;
       var posY;
       var posZ;
-
       var controlTarget;
 
       init();
       animate();
+
+      //Listen to child messages
+      window.addEventListener("message", receiver, false);
+      function receiver(e) {
+        if (event.data.event_id === "move") {
+          move(e.data.data);
+          if (e.data.target != null) {
+            document.getElementById("frame1").src = e.data.target;
+          }
+        }
+        console.log(e.data);
+      }
 
       function init() {
         container = document.createElement("div");
@@ -82,7 +91,7 @@
 
         // model
         var loader = new FBXLoader();
-        loader.load("se.fbx", function (object) {
+        loader.load("../se.fbx", function (object) {
           object.traverse(function (child) {
             if (child.isMesh) {
               child.castShadow = true;
@@ -101,10 +110,6 @@
         controls = new OrbitControls(camera, renderer.domElement);
         controls.update();
         window.addEventListener("resize", onWindowResize, false);
-
-        // stats
-        //stats = new Stats();
-        //container.appendChild( stats.dom );
       }
 
       function onWindowResize() {
@@ -114,47 +119,26 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
       }
 
-      //
-
-      function move() {
-        console.log("POSITION X");
-        console.log(camera.position.x);
-        console.log("POSITION Y");
-        console.log(camera.position.y);
-        console.log("POSITION Z");
-        console.log(camera.position.z);
-        console.log("TARGET X");
-        console.log(controls.target.x);
-        console.log("TARGET Y");
-        console.log(controls.target.y);
-        console.log("TARGET Z");
-        console.log(controls.target.z);
-
-        var from = {
-          x: camera.position.x,
-          y: camera.position.y,
-          z: camera.position.z,
-          rx: controls.target.x,
-          ry: controls.target.y,
-          rz: controls.target.z,
-        };
-
-        var to = {
-          x: posX,
-          y: posY,
-          z: posZ,
-          rx: 0,
-          ry: 0,
-          rz: 0,
-        };
-
+      /*
+      move para uma posição determinada pelo seguinte alvo:
+      var to = {
+        x: posX,
+        y: posY,
+        z: posZ,
+        rx: 0,
+        ry: 0,
+        rz: 0,
+      };
+    */
+      function move(to) {
+        let duration = 3000;
+        logPosition();
+        let from = getCamCurrentPosition();
         tween = new TWEEN.Tween(from)
-          .to(to, 3000)
+          .to(to, duration)
           .easing(TWEEN.Easing.Linear.None) // TWEEN.Easing.Quadratic.InOut ...
           .onUpdate(function () {
-            //camera.lookAt(new THREE.Vector3( 0, 0, 0 ) );
             camera.position.set(from.x, from.y, from.z);
-            //camera.controlTarget.set(from.tx,from.ty,from.tz);
             controls.target.set(from.rx, from.ry, from.rz);
           })
           .start();
@@ -169,6 +153,32 @@
         TWEEN.update();
         controls.update();
         renderer.render(scene, camera);
+      }
+
+      function logPosition() {
+        console.log("POSITION X");
+        console.log(camera.position.x);
+        console.log("POSITION Y");
+        console.log(camera.position.y);
+        console.log("POSITION Z");
+        console.log(camera.position.z);
+        console.log("TARGET X");
+        console.log(controls.target.x);
+        console.log("TARGET Y");
+        console.log(controls.target.y);
+        console.log("TARGET Z");
+        console.log(controls.target.z);
+      }
+
+      function getCamCurrentPosition() {
+        return {
+          x: camera.position.x,
+          y: camera.position.y,
+          z: camera.position.z,
+          rx: controls.target.x,
+          ry: controls.target.y,
+          rz: controls.target.z,
+        };
       }
     </script>
   </body>
