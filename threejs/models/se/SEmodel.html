@@ -7,7 +7,7 @@
       name="viewport"
       content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
     />
-    <link rel="stylesheet" href="./css/main.css" />
+    <link rel="stylesheet" href="./css/parent.css" />
   </head>
 
   <body>
@@ -44,10 +44,10 @@
       window.addEventListener("message", receiver, false);
       function receiver(e) {
         if (event.data.event_id === "move") {
-          move(e.data.data);
           if (e.data.target != null) {
             document.getElementById("frame1").src = e.data.target;
           }
+          move(e.data.data);
         }
         console.log(e.data);
       }

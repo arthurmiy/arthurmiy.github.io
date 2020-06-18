@@ -9,42 +9,70 @@
     <link rel="stylesheet" href="./css/main.css">
 </head>
 
-<body class="fragment">
-    <div id="banner">
-        <div class="container">
-            <div class="row">
-                <section class="card">
-                    <header>
-                        <h2>Área 1</h2>
-                    </header>
-                    <p>Curabitur sit amet nulla. Nam in massa. Sed vel tellus. Curabitur sem urna, consequat vel,
+<body>
+    <div class="fragment">
+        <div class="scrollable">
+
+            <div class="card_row">
+                <div class="card">
+
+                    <h2 class="cardTitle">Área 1</h2>
+
+                    <p class="cardText">Curabitur sit amet nulla. Nam in massa. Sed vel tellus. Curabitur sem urna,
+                        consequat vel,
                         suscipit in, mattis placerat, nulla. Sed ac leo.</p>
                     <button id="btn1" class="button button-style1">Ver no modelo</a>
-                </section>
-                <section class="card">
-                    <header>
-                        <h2>Área 2</h2>
-                    </header>
+                </div>
+                <div class="card">
+
+                    <h2 class="cardTitle">Área 2</h2>
+
                     <span class="pennant"><span class="fa fa-check-circle"></span></span>
-                    <p>Donec ornare neque ac sem. Mauris aliquet. Aliquam sem leo, vulputate sed, convallis at,
+                    <p class="cardText">Donec ornare neque ac sem. Mauris aliquet. Aliquam sem leo, vulputate sed,
+                        convallis at,
                         ultricies quis, justo. Donec nonummy magna.</p>
                     <button id="btn2" class="button button-style1">Ver no modelo</a>
-                </section>
-                <section class="card">
-                    <header>
-                        <h2>Área 3</h2>
-                    </header>
+                </div>
+                <div class="card">
+
+                    <h2 class="cardTitle">Área 3</h2>
+
                     <span class="pennant"><span class="fa fa-cogs"></span></span>
-                    <p>Curabitur sit amet nulla. Nam in massa. Sed vel tellus. Curabitur sem urna, consequat vel,
+                    <p class="cardText">Curabitur sit amet nulla. Nam in massa. Sed vel tellus. Curabitur sem urna,
+                        consequat vel,
                         suscipit in, mattis placerat, nulla. Sed ac leo.</p>
                     <button id="btn3" class="button button-style1">Ver no modelo</a>
-                </section>
+                </div>
+
+
+
+                <div class="card">
+
+                    <h2 class="cardTitle">Área 4</h2>
+
+                    <span class="pennant"><span class="fa fa-cogs"></span></span>
+                    <p class="cardText">Curabitur sit amet nulla. Nam in massa. Sed vel tellus. Curabitur sem urna,
+                        consequat vel,
+                        suscipit in, mattis placerat, nulla. Sed ac leo.</p>
+                    <button id="btn4" class="button button-style1">Ver no modelo</a>
+                </div>
+
+                <div class="card">
+
+                    <h2 class="cardTitle">Área 5</h2>
+
+                    <span class="pennant"><span class="fa fa-cogs"></span></span>
+                    <p class="cardText">Ca, consequat vel,
+                        suscipit in, mattis placerat, nulla. Sed ac leo.</p>
+                    <button id="btn5" class="button button-style1">Ver no modelo</a>
+                </div>
 
 
             </div>
+
         </div>
     </div>
-    
+
     <script type="text/javascript">
         window.addEventListener("message", receiver, false);
 
@@ -56,34 +84,34 @@
 
 
         document.getElementById("btn1").onclick = () => {
-                var frame = window.parent;
-                frame.postMessage({
-                    'event_id': 'move', 'data': {
-                        x: -927.8549647234763,
-                        y: 462.52404407311315,
-                        z: -3390.891268232134,
-                        rx: -944.3785473937126,
-                        ry: 0,
-                        rz: -1198.951170147871,
-                    }, 'target':'./area1.html'
-                }, '*');
-            };
+            var frame = window.parent;
+            frame.postMessage({
+                'event_id': 'move', 'data': {
+                    x: -927.8549647234763,
+                    y: 462.52404407311315,
+                    z: -3390.891268232134,
+                    rx: -944.3785473937126,
+                    ry: 0,
+                    rz: -1198.951170147871
+                }, 'target': './area1.html'
+            }, '*');
+        };
 
         document.getElementById("btn2").onclick = () => {
-                var frame = window.parent;
-                frame.postMessage({
-                    'event_id': 'move', 'data':  {
-                        x: 385.8299879178612,
-                        y: 405.00541934227385,
-                        z: -3331.983370597776,
-                        rx: -1060.4555577892074,
-                        ry: 0,
-                        rz: -1822.174142507929,
-                    }, 'target': './area2.html'
-                }, '*');
-            };
+            var frame = window.parent;
+            frame.postMessage({
+                'event_id': 'move', 'data': {
+                    x: 385.8299879178612,
+                    y: 405.00541934227385,
+                    z: -3331.983370597776,
+                    rx: -1060.4555577892074,
+                    ry: 0,
+                    rz: -1822.174142507929
+                }, 'target': './area2.html'
+            }, '*');
+        };
 
-       document.getElementById("btn3").onclick = () => {
+        document.getElementById("btn3").onclick = () => {
             var frame = window.parent;
             frame.postMessage({
                 'event_id': 'move', 'data': {
@@ -92,18 +120,41 @@
                     z: -3197.3575817586516,
                     rx: -459.47341568328665,
                     ry: 0,
-                    rz: -3182.326622995694,
+                    rz: -3182.326622995694
                 }, 'target': './area3.html'
+            }, '*');
+        };
+
+        document.getElementById("btn4").onclick = () => {
+            var frame = window.parent;
+            frame.postMessage({
+                'event_id': 'move', 'data': {
+                    x: 2872.505906284141,
+                    y: 868.1840843045671,
+                    z: -3591.261263852776,
+                    rx: 2247.9237402085923,
+                    ry: 0,
+                    rz: -2668.0831281993655
+                }, 'target': './area4.html'
+            }, '*');
+        };
+
+        document.getElementById("btn5").onclick = () => {
+            var frame = window.parent;
+            frame.postMessage({
+                'event_id': 'move', 'data': {
+                    x: 527.7121234311319,
+                    y: 367.06339605872455,
+                    z: -556.0094044673917,
+                    rx: 2500.3578078031223,
+                    ry: 0,
+                    rz: -814.925148131672
+                }, 'target': './area5.html'
             }, '*');
         };
 
 
     </script>
-
-
-
-
-
 
 </body>
 
