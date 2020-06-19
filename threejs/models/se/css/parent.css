@@ -52,7 +52,7 @@ body {
   position: absolute;
   z-index: 2;
   color: white;
-  font-size: 10em;
+  font-size: 10vw;
   background-color: rgba(0, 0, 0, 0.9);
 }
 
@@ -61,7 +61,7 @@ body {
   transition-duration: 1200ms;
   margin-top: 1vh;
   opacity: 0;
-  content: none;
+  /* content: none; */
 }
 
 @media screen and (max-height: 750px) {
