@@ -40,6 +40,22 @@
 
       var ld = document.getElementById("ld");
 
+      window.mobileCheck = function () {
+        const toMatch = [
+          /Android/i,
+          /webOS/i,
+          /iPhone/i,
+          /iPad/i,
+          /iPod/i,
+          /BlackBerry/i,
+          /Windows Phone/i,
+        ];
+
+        return toMatch.some((toMatchItem) => {
+          return navigator.userAgent.match(toMatchItem);
+        });
+      };
+
       var manager = new THREE.LoadingManager();
       manager.onStart = function (url, itemsLoaded, itemsTotal) {
         console.log(
@@ -132,15 +148,27 @@
 
         // model
         var loader = new FBXLoader(manager);
-        loader.load("../se.fbx", function (object) {
-          object.traverse(function (child) {
-            if (child.isMesh) {
-              child.castShadow = true;
-              child.receiveShadow = true;
-            }
+        if (window.mobileCheck()) {
+          loader.load("../worst.fbx", function (object) {
+            object.traverse(function (child) {
+              if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+              }
+            });
+            scene.add(object);
           });
-          scene.add(object);
-        });
+        } else {
+          loader.load("../low.fbx", function (object) {
+            object.traverse(function (child) {
+              if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+              }
+            });
+            scene.add(object);
+          });
+        }
 
         renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setPixelRatio(window.devicePixelRatio);

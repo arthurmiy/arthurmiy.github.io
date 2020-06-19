@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Modelo 3D - Subestação</title>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
+    />
+    <link rel="stylesheet" href="./css/parent.css" />
+  </head>
+
+  <body>
+    <div class="loading" id="ld">Carregando</div>
+    <iframe
+      id="frame1"
+      name="frame1"
+      class="iframe_content"
+      scrolling="no"
+      src="./main.html"
+    >
+    </iframe>
+
+    <script src="../tween.js"></script>
+    <script type="module">
+      //Import scripts
+      import * as THREE from "../../build/three.module.js";
+      import { OrbitControls } from "../jsm/controls/OrbitControls.js";
+      import { FBXLoader } from "../jsm/loaders/FBXLoader.js";
+
+      var container, stats, controls;
+      var camera, scene, renderer, light;
+      var clock = new THREE.Clock();
+      var mixer;
+      var tween;
+      var posX;
+      var posY;
+      var posZ;
+      var controlTarget;
+
+      var ld = document.getElementById("ld");
+
+      window.mobileCheck = function () {
+        const toMatch = [
+          /Android/i,
+          /webOS/i,
+          /iPhone/i,
+          /iPad/i,
+          /iPod/i,
+          /BlackBerry/i,
+          /Windows Phone/i,
+        ];
+
+        return toMatch.some((toMatchItem) => {
+          return navigator.userAgent.match(toMatchItem);
+        });
+      };
+
+      var manager = new THREE.LoadingManager();
+      manager.onStart = function (url, itemsLoaded, itemsTotal) {
+        console.log(
+          "Started loading file: " +
+            url +
+            ".\nLoaded " +
+            itemsLoaded +
+            " of " +
+            itemsTotal +
+            " files."
+        );
+      };
+
+      manager.onLoad = function () {
+        console.log("Loading complete!");
+        ld.classList.add("fadeout");
+
+        setTimeout(function () {
+          ld.remove();
+        }, 1200);
+      };
+
+      manager.onProgress = function (url, itemsLoaded, itemsTotal) {
+        console.log(
+          "Loading file: " +
+            url +
+            ".\nLoaded " +
+            itemsLoaded +
+            " of " +
+            itemsTotal +
+            " files."
+        );
+      };
+
+      manager.onError = function (url) {
+        console.log("There was an error loading " + url);
+      };
+
+      init();
+      animate();
+
+      //Listen to child messages
+      window.addEventListener("message", receiver, false);
+      function receiver(e) {
+        if (event.data.event_id === "move") {
+          if (e.data.target != null) {
+            document.getElementById("frame1").src = e.data.target;
+          }
+          move(e.data.data);
+        }
+        console.log(e.data);
+      }
+
+      function init() {
+        container = document.createElement("div");
+        document.body.appendChild(container);
+
+        camera = new THREE.PerspectiveCamera(
+          45,
+          window.innerWidth / window.innerHeight,
+          1,
+          80000
+        );
+        camera.position.set(1000, 2000, 3000);
+
+        posX = camera.position.x + 1;
+        posY = camera.position.y + 1;
+        posZ = camera.position.z + 2;
+        controlTarget = camera.controlTarget;
+
+        scene = new THREE.Scene();
+
+        light = new THREE.HemisphereLight(0xffffff, 0x444444);
+        light.position.set(0, 500, 200);
+        scene.add(light);
+
+        // ground
+        var mesh = new THREE.Mesh(
+          new THREE.PlaneBufferGeometry(2000, 2000),
+          new THREE.MeshPhongMaterial({ color: 0x999999, depthWrite: false })
+        );
+        mesh.rotation.x = -Math.PI / 2;
+        mesh.receiveShadow = true;
+        scene.add(mesh);
+
+        var grid = new THREE.GridHelper(2000, 20, 0x000000, 0x000000);
+        grid.material.opacity = 0.2;
+        grid.material.transparent = true;
+        scene.add(grid);
+
+        // model
+        var loader = new FBXLoader(manager);
+        if (window.mobileCheck()) {
+          loader.load("../low.fbx", function (object) {
+            object.traverse(function (child) {
+              if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+              }
+            });
+            scene.add(object);
+          });
+        } else {
+          loader.load("../se.fbx", function (object) {
+            object.traverse(function (child) {
+              if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+              }
+            });
+            scene.add(object);
+          });
+        }
+
+        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        container.appendChild(renderer.domElement);
+
+        controls = new OrbitControls(camera, renderer.domElement);
+        controls.update();
+        window.addEventListener("resize", onWindowResize, false);
+      }
+
+      function onWindowResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      }
+
+      /*
+        move para uma posição determinada pelo seguinte alvo:
+        var to = {
+          x: posX,
+          y: posY,
+          z: posZ,
+          rx: 0,
+          ry: 0,
+          rz: 0,
+        };
+      */
+      function move(to) {
+        let duration = 3000;
+        logPosition();
+        let from = getCamCurrentPosition();
+        tween = new TWEEN.Tween(from)
+          .to(to, duration)
+          .easing(TWEEN.Easing.Linear.None) // TWEEN.Easing.Quadratic.InOut ...
+          .onUpdate(function () {
+            camera.position.set(from.x, from.y, from.z);
+            controls.target.set(from.rx, from.ry, from.rz);
+          })
+          .start();
+      }
+
+      function stop() {
+        tween.stop();
+      }
+
+      function animate() {
+        requestAnimationFrame(animate);
+        TWEEN.update();
+        controls.update();
+        renderer.render(scene, camera);
+      }
+
+      function logPosition() {
+        console.log("POSITION X");
+        console.log(camera.position.x);
+        console.log("POSITION Y");
+        console.log(camera.position.y);
+        console.log("POSITION Z");
+        console.log(camera.position.z);
+        console.log("TARGET X");
+        console.log(controls.target.x);
+        console.log("TARGET Y");
+        console.log(controls.target.y);
+        console.log("TARGET Z");
+        console.log(controls.target.z);
+      }
+
+      function getCamCurrentPosition() {
+        return {
+          x: camera.position.x,
+          y: camera.position.y,
+          z: camera.position.z,
+          rx: controls.target.x,
+          ry: controls.target.y,
+          rz: controls.target.z,
+        };
+      }
+    </script>
+  </body>
+</html>
