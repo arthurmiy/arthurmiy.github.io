@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>three.js webgl - FBX loader</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <link rel="stylesheet" href="../css/main.css">
+</head>
+
+<body>
+    <div class="fragment">
+        <div class="scrollable">
+
+            <div class="card_row">
+                <div class="card">
+
+                    <h2 class="cardTitle">Área 1</h2>
+
+                    <p class="cardText">Curabitur sit amet nulla. Nam in massa. Sed vel tellus. Curabitur sem urna,
+                        consequat vel,
+                        suscipit in, mattis placerat, nulla. Sed ac leo.</p>
+                    <button id="btn1" class="button button-style1">Ver no modelo</a>
+                </div>
+                <div class="card">
+
+                    <h2 class="cardTitle">Área 2</h2>
+
+                    <span class="pennant"><span class="fa fa-check-circle"></span></span>
+                    <p class="cardText">Donec ornare neque ac sem. Mauris aliquet. Aliquam sem leo, vulputate sed,
+                        convallis at,
+                        ultricies quis, justo. Donec nonummy magna.</p>
+                    <button id="btn2" class="button button-style1">Ver no modelo</a>
+                </div>
+                <div class="card">
+
+                    <h2 class="cardTitle">Área 3</h2>
+
+                    <span class="pennant"><span class="fa fa-cogs"></span></span>
+                    <p class="cardText">Curabitur sit amet nulla. Nam in massa. Sed vel tellus. Curabitur sem urna,
+                        consequat vel,
+                        suscipit in, mattis placerat, nulla. Sed ac leo.</p>
+                    <button id="btn3" class="button button-style1">Ver no modelo</a>
+                </div>
+
+
+
+                <div class="card">
+
+                    <h2 class="cardTitle">Área 4</h2>
+
+                    <span class="pennant"><span class="fa fa-cogs"></span></span>
+                    <p class="cardText">Curabitur sit amet nulla. Nam in massa. Sed vel tellus. Curabitur sem urna,
+                        consequat vel,
+                        suscipit in, mattis placerat, nulla. Sed ac leo.</p>
+                    <button id="btn4" class="button button-style1">Ver no modelo</a>
+                </div>
+
+                <div class="card">
+
+                    <h2 class="cardTitle">Área 5</h2>
+
+                    <span class="pennant"><span class="fa fa-cogs"></span></span>
+                    <p class="cardText">Ca, consequat vel,
+                        suscipit in, mattis placerat, nulla. Sed ac leo.</p>
+                    <button id="btn5" class="button button-style1">Ver no modelo</a>
+                </div>
+
+
+            </div>
+
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        window.addEventListener("message", receiver, false);
+
+        function receiver(e) {
+            //if necessary e.origin and e.data can be used
+
+            console.log(e.data);
+        }
+
+
+        document.getElementById("btn1").onclick = () => {
+            var frame = window.parent;
+            frame.postMessage({
+                'event_id': 'move', 'data': {
+                    x: -0.1268045096743281,
+                    y: 0.022095590805746527,
+                    z: -0.680692402185037,
+                    rx: -0.08656476258432216,
+                    ry: 0,
+                    rz: -0.1902408690532115
+                }, 'target': './mini/area1.html'
+            }, '*');
+        };
+
+        document.getElementById("btn2").onclick = () => {
+            var frame = window.parent;
+            frame.postMessage({
+                'event_id': 'move', 'data': {
+                    x: 0.11595065667900996,
+                    y: -0.00240901203569364,
+                    z: -0.6328992999772791,
+                    rx: -0.11968061399339965,
+                    ry: 0,
+                    rz: -0.38228702566995615
+                }, 'target': './mini/area2.html'
+            }, '*');
+        };
+
+        document.getElementById("btn3").onclick = () => {
+            var frame = window.parent;
+            frame.postMessage({
+                'event_id': 'move', 'data': {
+                    x: 0.1439741806687407,
+                    y: -0.007411693175243731,
+                    z: -0.6267694442823376,
+                    rx: -0.12680580518788223,
+                    ry: 0,
+                    rz: -0.5551542775492699
+                }, 'target': './mini/area3.html'
+            }, '*');
+        };
+
+        document.getElementById("btn4").onclick = () => {
+            var frame = window.parent;
+            frame.postMessage({
+                'event_id': 'move', 'data': {
+                    x: 0.5770644998403518,
+                    y: 0.07430316510880898,
+                    z: -0.7322007155462631,
+                    rx: 0.5130741770915451,
+                    ry: 0,
+                    rz: -0.5510778325027165
+                }, 'target': './mini/area4.html'
+            }, '*');
+        };
+
+        document.getElementById("btn5").onclick = () => {
+            var frame = window.parent;
+            frame.postMessage({
+                'event_id': 'move', 'data': {
+                    x: 0.1568288797445657,
+                    y: 0.006120666523285559,
+                    z: -0.10708591800031088,
+                    rx: 0.18121668435138893,
+                    ry: 0,
+                    rz: -0.10682893864437487
+                }, 'target': './mini/area5.html'
+            }, '*');
+        };
+
+
+    </script>
+
+</body>
+
+</html>
