@@ -64,15 +64,49 @@ body {
   /* content: none; */
 }
 
+.toggleview {
+  background-color: rgba(0, 0, 0, 0);
+  z-index: 65;
+  height: 1em;
+  width: 100vw;
+  box-sizing: content-box;
+  display: block;
+  position: absolute;
+  margin-top: 45vh;
+}
+
+.toggleview:hover {
+  background-color: rgba(0, 0, 0, 0.9);
+  z-index: 65;
+  height: 1em;
+  width: 100vw;
+  box-sizing: content-box;
+  display: block;
+  position: absolute;
+  transition: all 1s;
+  cursor: pointer;
+}
+
 @media screen and (max-height: 750px) {
   .iframe_content {
     position: absolute;
-    top: 10px;
+    /* top: 10px; */
     left: 0;
     width: 100%;
     height: 90%;
     display: flex;
 
     border-width: 10;
+  }
+
+  .toggleview {
+    background-color: rgba(0, 0, 0, 0);
+    z-index: 65;
+    height: 1em;
+    width: 100vw;
+    box-sizing: content-box;
+    display: block;
+    position: absolute;
+    margin-top: 85vh;
   }
 }
