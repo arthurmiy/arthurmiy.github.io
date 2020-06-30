@@ -25,6 +25,37 @@
   background: #555;
 }
 
+.content {
+  overflow: scroll;
+  height: 100vh;
+  width: 100vw;
+  background-color: rgba(0, 0, 0, 0);
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.fullscrn {
+  height: 100vh;
+  width: 100vw;
+  background-color: rgba(0, 0, 0, 0);
+}
+
+.card {
+  display: inline-block;
+  width: 13em;
+  height: 20em;
+  text-align: center;
+  align-items: center;
+  border-color: white;
+  border-width: 0.2em;
+  border-style: solid;
+  border-radius: 1em;
+  padding: 0.5em;
+  box-sizing: border-box;
+  margin: 1em 1em;
+}
+
 .iframe_content {
   position: absolute;
   top: 0;

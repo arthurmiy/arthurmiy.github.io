@@ -12,21 +12,43 @@
   </head>
 
   <body>
-    <iframe
+    <!-- <iframe
       id="frame1"
       name="frame1"
       class="iframe_content"
       scrolling="no"
       src="./mini/main.html"
     >
-    </iframe>
+    </iframe> -->
+
+    <div id="content" class="content">
+      <div class="fullscrn">
+        <div class="card">
+          <h1>First area</h1>
+        </div>
+      </div>
+      <div class="fullscrn">
+        <h1>second area</h1>
+      </div>
+      <div class="fullscrn">
+        <h1>third area</h1>
+      </div>
+      <div class="fullscrn">
+        <h1>fourth area</h1>
+      </div>
+      <div class="fullscrn">
+        <h1>fifth area</h1>
+      </div>
+      <div class="fullscrn">
+        <h1>sixth area</h1>
+      </div>
+    </div>
 
     <script src="../tween.js"></script>
 
     <script type="module">
       //Import scripts
       import * as THREE from "../../build/three.module.js";
-      import { OrbitControls } from "../jsm/controls/OrbitControls.js";
       import { FBXLoader } from "../jsm/loaders/FBXLoader.js";
 
       var container, stats, controls;
@@ -38,6 +60,8 @@
       var posY;
       var posZ;
       var controlTarget;
+
+      var currentPercentage = 0;
 
       function NexusObject(url, renderer, render, material) {
         var gl = renderer.getContext();
@@ -148,19 +172,31 @@
 
       NexusObject.prototype = Object.create(THREE.Mesh.prototype);
 
+      ////////////////////////////////////////
+      //Start
+
       init();
       animate();
 
       //Listen to child messages
       window.addEventListener("message", receiver, false);
+
       function receiver(e) {
-        if (event.data.event_id === "move") {
-          if (e.data.target != null) {
-            document.getElementById("frame1").src = e.data.target;
-          }
-          move(e.data.data);
-        }
-        console.log(e.data);
+        // if (event.data.event_id === "move") {
+        //   if (e.data.target != null) {
+        //     document.getElementById("frame1").src = e.data.target;
+        //   }
+        //   move(e.data.data);
+        // }
+        currentPercentage = currentPercentage + 1;
+        var result = percentage2position(
+          currentPercentage,
+          { x: 0.5, y: 0.5, z: 0.5, rx: -1, ry: 0, rz: 0 },
+          e.data.data
+        );
+        // cameraTo(result);
+        move(result);
+        console.log(currentPercentage);
       }
 
       function init() {
@@ -174,10 +210,12 @@
           100
         );
         camera.position.set(0.5, 0.5, 0.5);
+        camera.rotation.set(-1, 0, 0);
 
         posX = camera.position.x + 1;
         posY = camera.position.y + 1;
         posZ = camera.position.z + 2;
+
         controlTarget = camera.controlTarget;
 
         scene = new THREE.Scene();
@@ -200,38 +238,12 @@
         grid.material.transparent = true;
         scene.add(grid);
 
-        // model
-        // var loader = new FBXLoader(manager);
-        // if (window.mobileCheck()) {
-        //   loader.load("../worst.fbx", function (object) {
-        //     object.traverse(function (child) {
-        //       if (child.isMesh) {
-        //         child.castShadow = true;
-        //         child.receiveShadow = true;
-        //       }
-        //     });
-        //     scene.add(object);
-        //   });
-        // } else {
-        //   loader.load("../low.fbx", function (object) {
-        //     object.traverse(function (child) {
-        //       if (child.isMesh) {
-        //         child.castShadow = true;
-        //         child.receiveShadow = true;
-        //       }
-        //     });
-        //     scene.add(object);
-        //   });
-        // }
-
         renderer = new THREE.WebGLRenderer({ antialias: false });
         renderer.setPixelRatio(window.devicePixelRatio);
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.shadowMap.enabled = true;
         container.appendChild(renderer.domElement);
 
-        controls = new OrbitControls(camera, renderer.domElement);
-        controls.update();
         window.addEventListener("resize", onWindowResize, false);
 
         var nexus_obj = new NexusObject("./se.nxs", renderer, render);
@@ -246,18 +258,24 @@
       }
 
       /*
-        move para uma posição determinada pelo seguinte alvo:
-        var to = {
-          x: posX,
-          y: posY,
-          z: posZ,
-          rx: 0,
-          ry: 0,
-          rz: 0,
-        };
-      */
+          move para uma posição determinada pelo seguinte alvo:
+          var to = {
+            x: posX,
+            y: posY,
+            z: posZ,
+            rx: 0,
+            ry: 0,
+            rz: 0,
+          };
+        */
+
+      function cameraTo(to) {
+        camera.position.set(to.x, to.y, to.z);
+        camera.rotation.set(to.rx, to.ry, to.rz);
+      }
+
       function move(to) {
-        let duration = 3000;
+        let duration = 100;
         logPosition();
         let from = getCamCurrentPosition();
         tween = new TWEEN.Tween(from)
@@ -265,7 +283,8 @@
           .easing(TWEEN.Easing.Linear.None) // TWEEN.Easing.Quadratic.InOut ...
           .onUpdate(function () {
             camera.position.set(from.x, from.y, from.z);
-            controls.target.set(from.rx, from.ry, from.rz);
+            camera.rotation.set(from.rx, from.ry, from.rz);
+            //controls.target.set(from.rx, from.ry, from.rz);
           })
           .start();
       }
@@ -277,29 +296,24 @@
       function animate() {
         requestAnimationFrame(animate);
         TWEEN.update();
-        controls.update();
+        //controls.update();
+        scrollIt();
         renderer.render(scene, camera);
       }
 
       function logPosition() {
-        console.log("POSITION X");
-        console.log(camera.position.x);
-        console.log("POSITION Y");
-        console.log(camera.position.y);
-        console.log("POSITION Z");
-        console.log(camera.position.z);
-        console.log("TARGET X");
-        console.log(controls.target.x);
-        console.log("TARGET Y");
-        console.log(controls.target.y);
-        console.log("TARGET Z");
-        console.log(controls.target.z);
-        console.log("r X");
-        console.log(camera.rotation.x);
-        console.log("r Y");
-        console.log(camera.rotation.y);
-        console.log("r Z");
-        console.log(camera.rotation.z);
+        // console.log("POSITION X");
+        // console.log(camera.position.x);
+        // console.log("POSITION Y");
+        // console.log(camera.position.y);
+        // console.log("POSITION Z");
+        // console.log(camera.position.z);
+        // console.log("TARGET X");
+        // console.log(camera.rotation.x);
+        // console.log("TARGET Y");
+        // console.log(camera.rotation.y);
+        // console.log("TARGET Z");
+        // console.log(camera.rotation.z);
       }
 
       function getCamCurrentPosition() {
@@ -307,9 +321,9 @@
           x: camera.position.x,
           y: camera.position.y,
           z: camera.position.z,
-          rx: controls.target.x,
-          ry: controls.target.y,
-          rz: controls.target.z,
+          rx: camera.rotation.x,
+          ry: camera.rotation.y,
+          rz: camera.rotation.z,
         };
       }
 
@@ -317,6 +331,156 @@
         Nexus.beginFrame(renderer.getContext());
         renderer.render(scene, camera);
         Nexus.endFrame(renderer.getContext());
+      }
+
+      function scrollStatus() {
+        let doc = document.getElementById("content");
+        let part = Math.floor(doc.scrollTop / doc.clientHeight);
+        let tolerance = 10;
+        let percentage =
+          (100 * (doc.scrollTop - part * doc.clientHeight)) / doc.clientHeight;
+        if (percentage < tolerance) {
+          percentage = 0;
+        } else {
+          percentage = (100 * (percentage - tolerance)) / (100 - tolerance);
+        }
+        return {
+          index: part,
+          percent: percentage,
+        };
+      }
+
+      function scrollIt() {
+        let scrollInfos = scrollStatus();
+
+        if (scrollInfos.index == 0) {
+          var result = percentage2position(
+            scrollInfos.percent,
+            {
+              x: -1.1804442714040286,
+              y: 0.7466150049885072,
+              z: -1.4986461926030912,
+              rx: -2.5952547373739483,
+              ry: -0.6279958878695612,
+              rz: -2.7984644386104587,
+            },
+            {
+              x: -0.1268045096743281,
+              y: 0.022095590805746527,
+              z: -0.680692402185037,
+              rx: -3.0965715683393884,
+              ry: -0.08178038606900759,
+              rz: -3.1379124443281117,
+            }
+          );
+          move(result);
+        } else if (scrollInfos.index == 1) {
+          var result = percentage2position(
+            scrollInfos.percent,
+            {
+              x: -0.1268045096743281,
+              y: 0.022095590805746527,
+              z: -0.680692402185037,
+              rx: -3.0965715683393884,
+              ry: -0.08178038606900759,
+              rz: -3.1379124443281117,
+            },
+            {
+              x: 0.11595065667900993,
+              y: -0.0024090120356936398,
+              z: -0.6328992999772791,
+              rx: 3.131980443458931 - Math.PI * 2,
+              ry: 0.7545751802634663,
+              rz: -3.135008381728186,
+            }
+          );
+          move(result);
+        } else if (scrollInfos.index == 2) {
+          var result = percentage2position(
+            scrollInfos.percent,
+            {
+              x: 0.11595065667900993,
+              y: -0.0024090120356936398,
+              z: -0.6328992999772791,
+              rx: 3.131980443458931 - Math.PI * 2,
+              ry: 0.7545751802634663,
+              rz: -3.135008381728186,
+            },
+            {
+              x: 0.1439741806687407,
+              y: -0.007411693175243733,
+              z: -0.6267694442823376,
+              rx: 3.0384664530984384 - Math.PI * 2,
+              ry: 1.3109192298300956,
+              rz: -3.04190598047423,
+            }
+          );
+          move(result);
+        } else if (scrollInfos.index == 3) {
+          var result = percentage2position(
+            scrollInfos.percent,
+
+            {
+              x: 0.1439741806687407,
+              y: -0.007411693175243733,
+              z: -0.6267694442823376,
+              rx: 3.0384664530984384 - Math.PI * 2,
+              ry: 1.3109192298300956,
+              rz: -3.04190598047423,
+            },
+            {
+              x: 0.5770644998403518,
+              y: 0.074303165108808988,
+              z: -0.7322007155462631,
+              rx: -2.7522932219086425,
+              ry: 0.3159154438178527,
+              rz: 3.014821210799083 - Math.PI * 2,
+            }
+          );
+          move(result);
+        } else if (scrollInfos.index == 4) {
+          var result = percentage2position(
+            scrollInfos.percent,
+
+            {
+              x: 0.5770644998403518,
+              y: 0.074303165108808988,
+              z: -0.7322007155462631,
+              rx: -2.7522932219086425,
+              ry: 0.3159154438178527,
+              rz: 3.014821210799083 - Math.PI * 2,
+            },
+            {
+              x: 0.1568288797445657,
+              y: 0.00612066652328556,
+              z: -0.10708591800031088,
+              rx: -1.6127572006293254,
+              ry: -1.3246946523200291,
+              rz: -1.6140591779061608,
+            }
+          );
+          move(result);
+        }
+      }
+
+      function percentage2position(percentage, from, to) {
+        var final = {
+          x: 0,
+          y: 0,
+          z: 0,
+          rx: 0,
+          ry: 0,
+          rz: 0,
+        };
+
+        final.x = from.x + (percentage / 100) * (to.x - from.x);
+        final.y = from.y + (percentage / 100) * (to.y - from.y);
+        final.z = from.z + (percentage / 100) * (to.z - from.z);
+        final.rx = from.rx + (percentage / 100) * (to.rx - from.rx);
+        final.ry = from.ry + (percentage / 100) * (to.ry - from.ry);
+        final.rz = from.rz + (percentage / 100) * (to.rz - from.rz);
+
+        return final;
       }
     </script>
   </body>
