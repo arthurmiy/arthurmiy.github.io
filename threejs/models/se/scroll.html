@@ -21,26 +21,46 @@
     >
     </iframe> -->
 
-    <div id="content" class="content">
+    <div id="content" class="content" onscroll="onScrollEvent()">
       <div class="fullscrn">
-        <div class="card">
-          <h1>First area</h1>
+        <div class="title" id="title">
+          Demonstração
         </div>
       </div>
       <div class="fullscrn">
-        <h1>second area</h1>
+        <div id="area2" class="area">
+            <div class="rightAll">
+                <h1>Área 1</h1>
+                <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Exercitationem tempora placeat magnam vero perferendis inventore vel repudiandae nobis, fugiat dolores!</p>
+            </div>
       </div>
       <div class="fullscrn">
-        <h1>third area</h1>
+        <div id="area3" class="area"><div class="leftAll">
+            <h1>Área 2</h1>
+            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Exercitationem tempora placeat magnam vero perferendis
+                inventore vel repudiandae nobis, fugiat dolores!</p>
+        </div></div>
       </div>
       <div class="fullscrn">
-        <h1>fourth area</h1>
+        <div id="area4" class="area"><div class="rightAll">
+            <h1>Área 3</h1>
+            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Exercitationem tempora placeat magnam vero perferendis
+                inventore vel repudiandae nobis, fugiat dolores!</p>
+        </div></div>
       </div>
       <div class="fullscrn">
-        <h1>fifth area</h1>
+        <div id="area5" class="area"><div class="leftAll">
+            <h1>Área 4</h1>
+            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Exercitationem tempora placeat magnam vero perferendis
+                inventore vel repudiandae nobis, fugiat dolores!</p>
+        </div></div>
       </div>
       <div class="fullscrn">
-        <h1>sixth area</h1>
+        <div id="area6" class="area"><div class="rightAll">
+            <h1>Área 5</h1>
+            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Exercitationem tempora placeat magnam vero perferendis
+                inventore vel repudiandae nobis, fugiat dolores!</p>
+        </div></div>
       </div>
     </div>
 
@@ -180,6 +200,41 @@
 
       //Listen to child messages
       window.addEventListener("message", receiver, false);
+
+      document.getElementById("content").onscroll = () => {
+        let scrollInfos = scrollStatus();
+        if (scrollInfos.index == 0) {
+          //turning invisible
+          document.getElementById("title").style.opacity =
+            (100 - scrollInfos.percent) / 100;
+          document.getElementById("area2").style.opacity =
+            scrollInfos.percent / 100;
+        } else if (scrollInfos.index == 1) {
+          //is invisible
+          document.getElementById("area2").style.opacity =
+            (100 - scrollInfos.percent) / 100;
+          document.getElementById("area3").style.opacity =
+            scrollInfos.percent / 100;
+        } else if (scrollInfos.index == 2) {
+          //is invisible
+          document.getElementById("area3").style.opacity =
+            (100 - scrollInfos.percent) / 100;
+          document.getElementById("area4").style.opacity =
+            scrollInfos.percent / 100;
+        } else if (scrollInfos.index == 3) {
+          //is invisible
+          document.getElementById("area4").style.opacity =
+            (100 - scrollInfos.percent) / 100;
+          document.getElementById("area5").style.opacity =
+            scrollInfos.percent / 100;
+        } else if (scrollInfos.index == 4) {
+          //is invisible
+          document.getElementById("area5").style.opacity =
+            (100 - scrollInfos.percent) / 100;
+          document.getElementById("area6").style.opacity =
+            scrollInfos.percent / 100;
+        }
+      };
 
       function receiver(e) {
         // if (event.data.event_id === "move") {
