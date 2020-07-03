@@ -43,7 +43,7 @@
   padding-right: auto;
   display: flex;
   height: 100vh;
-  font-size: 550%;
+  font-size: 10vw;
 }
 .area {
   background-color: rgba(0, 0, 0, 0);
