@@ -81,8 +81,73 @@
       var posY;
       var posZ;
       var controlTarget;
+      var raycaster = new THREE.Raycaster(); // create once
+      var mouse = new THREE.Vector2(); // create once
+      var objOne;
+      var over = false;
 
       var currentPercentage = 0;
+
+      document.addEventListener('mousedown', onDocumentMouseUp, false);
+      document.addEventListener('mousemove', onDocumentMouseMove, false);
+
+      function onDocumentMouseUp(event) {
+          event.preventDefault();
+
+          mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+          mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+
+          var vector = new THREE.Vector3(mouse.x, mouse.y, 0.5);
+          var pos = camera.position;
+          var ray = new THREE.Raycaster(pos, vector.unproject(camera).sub(camera.position).normalize());
+
+          var intersects = ray.intersectObjects([objOne],true);
+
+          if (intersects.length > 0) {
+            console.log("touched:" + intersects[0]);
+            window.open("./free.html", "_self")
+          }
+          else {
+            console.log("not touched");
+          }
+        }
+
+        function onDocumentMouseMove(event) {
+            event.preventDefault();
+
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+
+            var vector = new THREE.Vector3(mouse.x, mouse.y, 0.5);
+            var pos = camera.position;
+            var ray = new THREE.Raycaster(pos, vector.unproject(camera).sub(camera.position).normalize());
+
+            var intersects = ray.intersectObjects([objOne], true);
+
+            if (intersects.length > 0) {
+              //touched
+              over = true;
+            }
+            else {
+              over=false;
+            }
+
+             if (objOne != null) {
+            if (over) {
+              // objOne.children[0].currentHex = objOne.children[0].material.opacity=0.5;
+              var INTERSECTED = objOne.children[0];
+              INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
+              INTERSECTED.material.emissive.setHex(0x990000);
+              document.getElementById("content").style.cursor = "pointer";
+            } else {
+              var INTERSECTED = objOne.children[0];
+              INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
+              INTERSECTED.material.emissive.setHex(0x000000);
+              document.getElementById("content").style.cursor = "auto";
+            }
+          }
+          }
+
 
       function NexusObject(url, renderer, render, material) {
         var gl = renderer.getContext();
@@ -313,7 +378,8 @@
           function (gltf) {
             gltf.scene.scale.set(1 / 50, 1 / 50, 1 / 50);
             gltf.scene.position.set(0.0695, -0.068, 0.019);
-            scene.add(gltf.scene);
+            objOne = gltf.scene;
+            scene.add(objOne);
 
             // gltf.animations; // Array<THREE.AnimationClip>
             // gltf.scene; // THREE.Group
@@ -416,6 +482,8 @@
 
       function render() {
         Nexus.beginFrame(renderer.getContext());
+       
+
         renderer.render(scene, camera);
         Nexus.endFrame(renderer.getContext());
       }

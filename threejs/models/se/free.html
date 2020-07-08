@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Modelo 3D - Subestação</title>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
+    />
+    <link rel="stylesheet" href="./css/parent.css" />
+    <script src="../../build/nexus.js"></script>
+  </head>
+
+  <body>
+    <script src="../tween.js"></script>
+
+    <script type="module">
+      //Import scripts
+      import * as THREE from "../../build/three.module.js";
+      import { OrbitControls } from "../jsm/controls/OrbitControls.js";
+      import { FBXLoader } from "../jsm/loaders/FBXLoader.js";
+      import { GLTFLoader } from "../jsm/loaders/GLTFLoader.js";
+
+      var container, stats, controls;
+      var camera, scene, renderer, light;
+      var clock = new THREE.Clock();
+      var mixer;
+      var tween;
+      var posX;
+      var posY;
+      var posZ;
+      var controlTarget;
+
+      function NexusObject(url, renderer, render, material) {
+        var gl = renderer.getContext();
+        var geometry = new THREE.BufferGeometry();
+        var positions = new Float32Array(3);
+
+        geometry.setAttribute(
+          "position",
+          new THREE.BufferAttribute(positions, 3)
+        );
+
+        if (!material) this.autoMaterial = true;
+
+        THREE.Mesh.call(this, geometry, material);
+        this.frustumCulled = false;
+
+        var mesh = this;
+        var instance = (this.instance = new Nexus.Instance(gl));
+        instance.open(url);
+        instance.onLoad = function () {
+          var s = 1 / instance.mesh.sphere.radius;
+          var pos = instance.mesh.sphere.center;
+          mesh.position.set(-pos[0] * s, -pos[1] * s, -pos[2] * s);
+          mesh.scale.set(s, s, s);
+          if (mesh.autoMaterial)
+            mesh.material = new THREE.MeshLambertMaterial({ color: 0xffffff });
+
+          if (this.mesh.vertex.normal) {
+            var normals = new Float32Array(3);
+            geometry.setAttribute(
+              "normal",
+              new THREE.BufferAttribute(normals, 3)
+            );
+          }
+          if (this.mesh.vertex.color) {
+            var colors = new Float32Array(4);
+            geometry.setAttribute(
+              "color",
+              new THREE.BufferAttribute(colors, 4)
+            );
+            if (mesh.autoMaterial)
+              mesh.material = new THREE.MeshLambertMaterial({
+                vertexColors: THREE.VertexColors,
+              });
+          }
+
+          if (this.mesh.vertex.texCoord) {
+            var uv = new Float32Array(2);
+            geometry.setAttribute("uv", new THREE.BufferAttribute(uv, 2));
+            if (mesh.autoMaterial) {
+              var texture = new THREE.DataTexture(
+                new Uint8Array([1, 1, 1]),
+                1,
+                1,
+                THREE.RGBFormat
+              );
+              texture.needsUpdate = true;
+              mesh.material = new THREE.MeshLambertMaterial({
+                color: 0xffffff,
+                map: texture,
+              });
+            }
+          }
+
+          if (this.mesh.face.index) {
+            var indices = new Uint32Array(3);
+            geometry.setIndex(new THREE.BufferAttribute(indices, 3));
+          }
+          render();
+        };
+        instance.onUpdate = function () {
+          render();
+        };
+
+        this.onAfterRender = function (
+          renderer,
+          scene,
+          camera,
+          geometry,
+          material,
+          group
+        ) {
+          if (!instance.isReady) return;
+          var s = new THREE.Vector2();
+          renderer.getSize(s);
+          instance.updateView(
+            [0, 0, s.width, s.height],
+            camera.projectionMatrix.elements,
+            mesh.modelViewMatrix.elements
+          );
+          var program = renderer.getContext().getParameter(gl.CURRENT_PROGRAM);
+          instance.attributes[
+            "position"
+          ] = renderer.getContext().getAttribLocation(program, "position");
+          instance.attributes[
+            "normal"
+          ] = renderer.getContext().getAttribLocation(program, "normal");
+          instance.attributes[
+            "color"
+          ] = renderer.getContext().getAttribLocation(program, "color");
+          instance.attributes["uv"] = renderer
+            .getContext()
+            .getAttribLocation(program, "uv");
+
+          instance.render();
+        };
+      }
+
+      NexusObject.prototype = Object.create(THREE.Mesh.prototype);
+
+      init();
+      animate();
+
+      //Listen to child messages
+      window.addEventListener("message", receiver, false);
+      function receiver(e) {
+        if (event.data.event_id === "move") {
+          if (e.data.target != null) {
+            document.getElementById("frame1").src = e.data.target;
+          }
+          move(e.data.data);
+        }
+        console.log(e.data);
+      }
+
+      function init() {
+        container = document.createElement("div");
+        document.body.appendChild(container);
+
+        camera = new THREE.PerspectiveCamera(
+          45,
+          window.innerWidth / window.innerHeight,
+          0.005,
+          100
+        );
+        camera.position.set(0.5, 0.5, 0.5);
+
+        posX = camera.position.x + 1;
+        posY = camera.position.y + 1;
+        posZ = camera.position.z + 2;
+        controlTarget = camera.controlTarget;
+
+        scene = new THREE.Scene();
+
+        light = new THREE.HemisphereLight(0xffffff, 0x444444);
+        light.position.set(0, 500, 200);
+        scene.add(light);
+
+        // ground
+        var mesh = new THREE.Mesh(
+          new THREE.PlaneBufferGeometry(2, 2),
+          new THREE.MeshPhongMaterial({ color: 0x999999, depthWrite: false })
+        );
+        mesh.rotation.x = -Math.PI / 2;
+        mesh.receiveShadow = true;
+        scene.add(mesh);
+
+        var grid = new THREE.GridHelper(2000, 20, 0x000000, 0x000000);
+        grid.material.opacity = 0.2;
+        grid.material.transparent = true;
+        scene.add(grid);
+
+        renderer = new THREE.WebGLRenderer({ antialias: false });
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        container.appendChild(renderer.domElement);
+
+        controls = new OrbitControls(camera, renderer.domElement);
+        controls.update();
+        window.addEventListener("resize", onWindowResize, false);
+
+        var nexus_obj = new NexusObject("./se.nxs", renderer, render);
+        scene.add(nexus_obj);
+      }
+
+      function onWindowResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      }
+
+      /*
+        move para uma posição determinada pelo seguinte alvo:
+        var to = {
+          x: posX,
+          y: posY,
+          z: posZ,
+          rx: 0,
+          ry: 0,
+          rz: 0,
+        };
+      */
+      function move(to) {
+        let duration = 3000;
+        logPosition();
+        let from = getCamCurrentPosition();
+        tween = new TWEEN.Tween(from)
+          .to(to, duration)
+          .easing(TWEEN.Easing.Linear.None) // TWEEN.Easing.Quadratic.InOut ...
+          .onUpdate(function () {
+            camera.position.set(from.x, from.y, from.z);
+            controls.target.set(from.rx, from.ry, from.rz);
+          })
+          .start();
+      }
+
+      function stop() {
+        tween.stop();
+      }
+
+      function animate() {
+        requestAnimationFrame(animate);
+        TWEEN.update();
+        controls.update();
+        renderer.render(scene, camera);
+      }
+
+      function logPosition() {
+        console.log("POSITION X");
+        console.log(camera.position.x);
+        console.log("POSITION Y");
+        console.log(camera.position.y);
+        console.log("POSITION Z");
+        console.log(camera.position.z);
+        console.log("TARGET X");
+        console.log(controls.target.x);
+        console.log("TARGET Y");
+        console.log(controls.target.y);
+        console.log("TARGET Z");
+        console.log(controls.target.z);
+        console.log("r X");
+        console.log(camera.rotation.x);
+        console.log("r Y");
+        console.log(camera.rotation.y);
+        console.log("r Z");
+        console.log(camera.rotation.z);
+      }
+
+      function getCamCurrentPosition() {
+        return {
+          x: camera.position.x,
+          y: camera.position.y,
+          z: camera.position.z,
+          rx: controls.target.x,
+          ry: controls.target.y,
+          rz: controls.target.z,
+        };
+      }
+
+      function render() {
+        Nexus.beginFrame(renderer.getContext());
+        renderer.render(scene, camera);
+        Nexus.endFrame(renderer.getContext());
+      }
+    </script>
+  </body>
+</html>
