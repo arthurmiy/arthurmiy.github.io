@@ -129,6 +129,20 @@
   border-width: 0;
 }
 
+.button {
+  background-color: teal;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0.8em;
+  display: block;
+  z-index: 1;
+}
+
+.button:hover {
+  background-color: rgb(2, 68, 68);
+  transition: all 600ms;
+}
+
 html,
 body {
   height: 100%;

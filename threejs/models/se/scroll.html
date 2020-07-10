@@ -62,6 +62,16 @@
                 inventore vel repudiandae nobis, fugiat dolores!</p>
         </div></div>
       </div>
+      <div class="fullscrn">
+        <div id="area7" class="area">
+          <div class="leftAll">
+            <h1>Área 6</h1>
+            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Exercitationem tempora placeat magnam vero perferendis
+              inventore vel repudiandae nobis, fugiat dolores!</p>
+              <button id="btn1" class="button button-style1">Abrir chave seccionadora</a>
+          </div>
+        </div>
+      </div>
     </div>
 
     <script src="../tween.js"></script>
@@ -77,6 +87,7 @@
       var clock = new THREE.Clock();
       var mixer;
       var tween;
+        var tween2;
       var posX;
       var posY;
       var posZ;
@@ -85,11 +96,30 @@
       var mouse = new THREE.Vector2(); // create once
       var objOne;
       var over = false;
+      var chaves;
+      var switchOpen=false;
+      var switchZero;
+      var switchPi;
+
+      var angleTo;
+        var angleFrom;
 
       var currentPercentage = 0;
 
       document.addEventListener('mousedown', onDocumentMouseUp, false);
       document.addEventListener('mousemove', onDocumentMouseMove, false);
+
+      document.getElementById("btn1").onclick = onBtn1Click;
+
+      function onBtn1Click() {
+          switchOpen=(!switchOpen);
+          if (switchOpen) {
+            document.getElementById("btn1").innerHTML = "Fechar chave seccionadora"
+          } else {
+            document.getElementById("btn1").innerHTML = "Abrir chave seccionadora"
+          }
+          toggleSwitch();
+      }
 
       function onDocumentMouseUp(event) {
           event.preventDefault();
@@ -299,6 +329,12 @@
             (100 - scrollInfos.percent) / 100;
           document.getElementById("area6").style.opacity =
             scrollInfos.percent / 100;
+        } else if (scrollInfos.index == 5) {
+          //is invisible
+          document.getElementById("area6").style.opacity =
+            (100 - scrollInfos.percent) / 100;
+          document.getElementById("area7").style.opacity =
+            scrollInfos.percent / 100;
         }
       };
 
@@ -401,6 +437,61 @@
 
           }
         );
+
+        var loader = new FBXLoader();
+        loader.load("./chave.fbx", function (object) {
+          var tmpMesh;
+          object.traverse(function (child) {
+            if (child.isMesh) {
+              child.castShadow = true;
+              child.receiveShadow = true;
+
+              tmpMesh = child.clone();
+            }
+          });
+          if (chaves == null) {
+            chaves = new THREE.Group();
+          }
+
+          //POSIÇÃO 1.1
+          var p = [0.4162 / 0.0001895, 0.0565 / 0.0001895, 0.298 / 0.0001895];
+          tmpMesh.position.set(p[0], p[1], p[2]);
+          chaves.add(tmpMesh.clone());
+
+          //POSIÇÃO 1.2
+          p[0] = p[0] + 0.0564 / 0.0001895;
+          tmpMesh.position.set(p[0], p[1], p[2] + 14);
+          chaves.add(tmpMesh.clone());
+
+          //POSIÇÃO 1.3
+          p[0] = p[0] + 0.0564 / 0.0001895;
+          tmpMesh.position.set(p[0] - 4, p[1], p[2] + 26);
+          chaves.add(tmpMesh.clone());
+
+          //POSIÇÃO 2.1
+          p = [0.4162 / 0.0001895, 0.0565 / 0.0001895, 0.298 / 0.0001895];
+          p[2] = p[2] + 0.0581 / 0.0001895;
+          tmpMesh.position.set(p[0] - 13, p[1], p[2] + 3);
+          chaves.add(tmpMesh.clone());
+
+          //POSIÇÃO 2.2
+          p[0] = p[0] + 0.0564 / 0.0001895;
+          tmpMesh.position.set(p[0] - 18, p[1], p[2] + 14);
+          chaves.add(tmpMesh.clone());
+
+          //POSIÇÃO 2.3
+          p[0] = p[0] + 0.0564 / 0.0001895;
+          tmpMesh.position.set(p[0] - 20, p[1], p[2] + 26);
+          chaves.add(tmpMesh.clone());
+          // p[2] = p[2] + 0.058;
+
+        
+
+          chaves.scale.set(0.0001895, 0.0001895, 0.0001895);
+
+          // chaves.add(object);
+          scene.add(chaves);
+        });
       }
 
       function onWindowResize() {
@@ -441,6 +532,37 @@
           })
           .start();
       }
+
+
+      function toggleSwitch() {
+          let duration=700;
+
+          if (switchZero==null) {
+            switchZero = chaves.children[0].rotation.z;
+            switchPi = chaves.children[0].rotation.z-(Math.PI/2);
+          }
+          
+          if (!switchOpen) {
+            angleFrom = {"rot": chaves.children[0].rotation.z};
+            angleTo = {"rot":switchZero};
+          } else {
+            angleTo = { "rot": switchPi };
+            angleFrom = { "rot": chaves.children[0].rotation.z };
+          }
+          tween2 = new TWEEN.Tween(angleFrom)
+            .to(angleTo, duration)
+            .easing(TWEEN.Easing.Quadratic.InOut) // TWEEN.Easing.Quadratic.InOut ...
+            .onUpdate(function () {
+              chaves.children[0].rotation.set(chaves.children[0].rotation.x, chaves.children[0].rotation.y, angleFrom.rot);
+              chaves.children[1].rotation.set(chaves.children[0].rotation.x, chaves.children[0].rotation.y, angleFrom.rot);
+              chaves.children[2].rotation.set(chaves.children[0].rotation.x, chaves.children[0].rotation.y, angleFrom.rot);
+              chaves.children[3].rotation.set(chaves.children[0].rotation.x, chaves.children[0].rotation.y, angleFrom.rot);
+              chaves.children[4].rotation.set(chaves.children[0].rotation.x, chaves.children[0].rotation.y, angleFrom.rot);
+              chaves.children[5].rotation.set(chaves.children[0].rotation.x, chaves.children[0].rotation.y, angleFrom.rot);
+            })
+           
+            .start();
+        }
 
       function stop() {
         tween.stop();
@@ -520,12 +642,12 @@
               rz: -2.7984644386104587,
             },
             {
-              x: -0.1268045096743281,
-              y: 0.022095590805746527,
-              z: -0.680692402185037,
-              rx: -3.0965715683393884,
-              ry: -0.08178038606900759,
-              rz: -3.1379124443281117,
+              x: -0.13219376193708363,
+              y: 0.030944228112111043,
+              z: -0.6619605005555512,
+              rx: -3.0927735510419048,
+              ry: -0.0886789154041521,
+              rz: -3.137265689374133,
             }
           );
           move(result);
@@ -533,20 +655,20 @@
           var result = percentage2position(
             scrollInfos.percent,
             {
-              x: -0.1268045096743281,
-              y: 0.022095590805746527,
-              z: -0.680692402185037,
-              rx: -3.0965715683393884,
-              ry: -0.08178038606900759,
-              rz: -3.1379124443281117,
+              x: -0.13219376193708363,
+              y: 0.030944228112111043,
+              z: -0.6619605005555512,
+              rx: -3.0927735510419048,
+              ry: -0.0886789154041521,
+              rz: -3.137265689374133,
             },
             {
-              x: 0.11595065667900993,
-              y: -0.0024090120356936398,
-              z: -0.6328992999772791,
-              rx: 3.131980443458931 - Math.PI * 2,
-              ry: 0.7545751802634663,
-              rz: -3.135008381728186,
+              x: 0.09661259564330948,
+              y: 0.0030692482349903875,
+              z: -0.6154860487253775,
+              rx: -3.132041378019173,
+              ry: 0.6419557541318943,
+              rz: 3.1358735916117415-2*Math.PI,
             }
           );
           move(result);
@@ -554,20 +676,20 @@
           var result = percentage2position(
             scrollInfos.percent,
             {
-              x: 0.11595065667900993,
-              y: -0.0024090120356936398,
-              z: -0.6328992999772791,
-              rx: 3.131980443458931 - Math.PI * 2,
-              ry: 0.7545751802634663,
-              rz: -3.135008381728186,
+              x: 0.09661259564330948,
+              y: 0.0030692482349903875,
+              z: -0.6154860487253775,
+              rx: -3.132041378019173,
+              ry: 0.6419557541318943,
+              rz: 3.1358735916117415-2*Math.PI,
             },
             {
-              x: 0.1439741806687407,
-              y: -0.007411693175243733,
-              z: -0.6267694442823376,
-              rx: 3.0384664530984384 - Math.PI * 2,
-              ry: 1.3109192298300956,
-              rz: -3.04190598047423,
+              x: 0.12590141486329195,
+              y: 0.0023749257766910877,
+              z: -0.5840516251216518,
+              rx: -3.061632265404466,
+              ry: 1.4748780334079732,
+              rz: 3.061998260081726-2*Math.PI,
             }
           );
           move(result);
@@ -576,12 +698,12 @@
             scrollInfos.percent,
 
             {
-              x: 0.1439741806687407,
-              y: -0.007411693175243733,
-              z: -0.6267694442823376,
-              rx: 3.0384664530984384 - Math.PI * 2,
-              ry: 1.3109192298300956,
-              rz: -3.04190598047423,
+              x: 0.12590141486329195,
+              y: 0.0023749257766910877,
+              z: -0.5840516251216518,
+              rx: -3.061632265404466,
+              ry: 1.4748780334079732,
+              rz: 3.061998260081726-2*Math.PI,
             },
             {
               x: 0.5770644998403518,
@@ -606,12 +728,34 @@
               rz: 3.014821210799083 - Math.PI * 2,
             },
             {
-              x: 0.1568288797445657,
-              y: 0.00612066652328556,
-              z: -0.10708591800031088,
-              rx: -1.6127572006293254,
-              ry: -1.3246946523200291,
-              rz: -1.6140591779061608,
+              x: 0.1526226751950019,
+              y: 0.02837833604384196,
+              z: -0.0645528451604828,
+              rx: -1.824947678471544,
+              ry: -1.3307370760738388,
+              rz: -1.8321184534050359,
+            }
+          );
+          move(result);
+        } else if (scrollInfos.index == 5) {
+          var result = percentage2position(
+            scrollInfos.percent,
+
+            {
+              x: 0.1526226751950019,
+              y: 0.02837833604384196,
+              z: -0.0645528451604828,
+              rx: -1.824947678471544,
+              ry: -1.3307370760738388,
+              rz: -1.8321184534050359,
+            },
+            {
+              x: 0.3564316260590346,
+              y: 0.23109082408955464,
+              z: 0.2556532891492673,
+              rx: -1.920063985082916,
+              ry: -0.4996168567443449,
+              rz: -2.220787103436767,
             }
           );
           move(result);
