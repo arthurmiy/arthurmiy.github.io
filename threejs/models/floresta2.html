@@ -38,14 +38,14 @@
           1,
           80000
         );
-        camera.position.set(1000, 2000, 3000);
+        camera.position.set(10000, 25000, 30000);
 
         scene = new THREE.Scene();
         //scene.background = new THREE.Color( 0xa0a0a0 );
         //scene.fog = new THREE.Fog( 0xa0a0a0, 200, 1000 );
 
         light = new THREE.HemisphereLight(0xffffff, 0x444444);
-        light.position.set(0, 200, 0);
+        light.position.set(0, 1, 0);
         scene.add(light);
 
         light = new THREE.DirectionalLight(0xffffff);
@@ -75,7 +75,7 @@
 
         // model
         var loader = new FBXLoader();
-        loader.load("./biologia17_simplified_3d_mesh.fbx", function (object) {
+        loader.load("./bio.fbx", function (object) {
           //mixer = new THREE.AnimationMixer( object );
 
           //var action = mixer.clipAction( object.animations[ 0 ] );
