@@ -1,0 +1,126 @@
+/* @import url("https://fonts.googleapis.com/css2?family=Patua+One&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@700&display=swap"); */
+@import url("https://fonts.googleapis.com/css2?family=Zilla+Slab:ital,wght@1,600&display=swap");
+
+body {
+  background-color: rgb(8, 6, 27);
+  color: whitesmoke;
+  /* font-family: "Patua One", cursive; */
+  font-family: "Zilla Slab", serif;
+}
+
+.label {
+  text-decoration: underline;
+  font-weight: bolder;
+  font-size: x-large;
+  margin-right: auto;
+  color: rgb(207, 207, 223);
+  padding: 10px;
+}
+
+.sectionTitle {
+  text-decoration: underline;
+  font-weight: bolder;
+  font-size: xx-large;
+  color: rgb(235, 236, 236);
+  padding: 10px;
+}
+
+.value {
+  font-weight: bolder;
+  font-size: x-large;
+  color: rgb(43, 42, 42);
+  border: 3px solid lightslategrey;
+  border-radius: 5px;
+  background-color: rgb(177, 199, 221);
+  padding: 10px;
+}
+
+.valueConfig {
+  font-weight: bolder;
+  font-size: x-large;
+  color: rgb(43, 42, 42);
+  border: 3px solid rgb(153, 119, 119);
+  border-radius: 5px;
+  background-color: rgb(221, 177, 177);
+  padding: 10px;
+}
+
+.fieldcontainer {
+  padding: 10px;
+  display: inline-flex;
+  width: 300px;
+}
+
+.measuredBlock {
+  display: inline-block;
+  width: 100vw;
+  padding: 1rem;
+}
+
+.configuredBlock {
+  display: inline-block;
+  width: 100vw;
+  padding: 1rem;
+}
+
+.grafico {
+  width: 40rem;
+  display: inline-block;
+  background-color: rgb(229, 236, 243);
+  padding: 1rem;
+  border-radius: 10px;
+  margin: 10px;
+}
+
+.top {
+  width: 90vw;
+  height: 100px;
+
+  display: inline-flex;
+  align-content: center;
+}
+
+.pageTitle {
+  margin-left: 50px;
+
+  font-weight: bolder;
+  font-size: xx-large;
+  -ms-transform: translateY(50%);
+  transform: translateY(50%);
+  color: rgb(212, 212, 212);
+}
+
+#pgLogo {
+  height: 100px;
+  display: inline-flex;
+}
+
+button {
+  margin-left: 10px;
+  margin-right: 10px;
+  color: rgb(226, 245, 245);
+  width: 140px;
+  height: 40px;
+  border-radius: 4px;
+  background-color: rgb(124, 113, 219);
+  box-shadow: beige;
+}
+
+button:hover {
+  transition: all 300ms ease-in-out;
+  background-color: rgb(84, 77, 155);
+  border-radius: 15px;
+  cursor: pointer;
+}
+
+@media screen and (max-width: 40rem) {
+  .grafico {
+    width: 100vw;
+    display: inline-block;
+    background-color: rgb(229, 236, 243);
+    padding: 1rem;
+    border-radius: 10px;
+    margin: 10px;
+  }
+}
