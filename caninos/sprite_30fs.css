@@ -1,0 +1,19 @@
+@keyframes play9 {
+  0% {
+    background-position: 0px 0px;
+  }
+  100% {
+    background-position: -500px 0px;
+  }
+}
+.shapeshifter {
+  animation-duration: 2000ms;
+  animation-timing-function: steps(5);
+  width: 100px;
+  height: 100px;
+  background-repeat: no-repeat;
+}
+.shapeshifter.play {
+  animation-name: play9;
+  animation-iteration-count:infinite;
+}
