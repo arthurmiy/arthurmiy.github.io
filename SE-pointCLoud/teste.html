@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="Se modelo em nuvem de pontos" content="" />
+    <meta name="author" content="" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=no"
+    />
+    <title>Subestação Bauru</title>
+
+    <link rel="stylesheet" type="text/css" href="libs/potree/potree.css" />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="libs/jquery-ui/jquery-ui.min.css"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="libs/perfect-scrollbar/css/perfect-scrollbar.css"
+    />
+    <link rel="stylesheet" type="text/css" href="libs/openlayers3/ol.css" />
+    <link rel="stylesheet" type="text/css" href="libs/spectrum/spectrum.css" />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="libs/jstree/themes/mixed/style.css"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cesiumjs.org/releases/1.57/Build/Cesium/Widgets/widgets.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://arthurmiy.github.io/threejs/models/se/iconsrc/css/fontawesome.min.css"
+    />
+    <link rel="stylesheet" href="./css/parent.css" />
+  </head>
+
+  <body>
+    <script src="libs/jquery/jquery-3.1.1.min.js"></script>
+    <script src="libs/spectrum/spectrum.js"></script>
+    <script src="libs/perfect-scrollbar/js/perfect-scrollbar.jquery.js"></script>
+    <script src="libs/jquery-ui/jquery-ui.min.js"></script>
+    <script src="libs/three.js/build/three.min.js"></script>
+    <script src="libs/other/BinaryHeap.js"></script>
+    <script src="libs/tween/tween.min.js"></script>
+    <script src="libs/d3/d3.js"></script>
+    <script src="libs/proj4/proj4.js"></script>
+    <script src="libs/openlayers3/ol.js"></script>
+    <script src="libs/i18next/i18next.js"></script>
+    <script src="libs/jstree/jstree.js"></script>
+    <script src="libs/potree/potree.js"></script>
+    <script src="libs/plasio/js/laslaz.js"></script>
+    <script src="https://cesiumjs.org/releases/1.57/Build/Cesium/Cesium.js"></script>
+
+    <!-- INCLUDE ADDITIONAL DEPENDENCIES HERE -->
+    document.title = "Subestação Bauru"; viewer.setEDLEnabled(false);
+    viewer.setBackground("gradient"); // ["skybox", "gradient", "black",
+    "white"]; viewer.setDescription(``);
+
+    <button class="toggleview" id="toggleBTN">
+      ^
+    </button>
+
+    <iframe
+      id="frame1"
+      name="frame1"
+      class="iframe_content"
+      scrolling="no"
+      src="./mini/main.html"
+    >
+    </iframe>
+
+    <div
+      class="potree_container"
+      style="
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        left: 0px;
+        top: 0px;
+      "
+    >
+      <div id="potree_render_area">
+        <div
+          id="cesiumContainer"
+          style="
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-color: green;
+          "
+        ></div>
+      </div>
+      <div id="potree_sidebar_container" style="height: 50vh;"></div>
+    </div>
+
+    <script>
+      Cesium.Ion.defaultAccessToken =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIwZDQ4MmY3My1mNzU1LTRlMDYtOWNjYS0yMmJkNWQ2ZWMwMzYiLCJpZCI6MTExOTMsInNjb3BlcyI6WyJhc3IiLCJnYyJdLCJpYXQiOjE1NTgzODc0NzN9.wVOpLrzpAd_3HNbJstWuTOxSSoTj5e4e6gGEAWSOxCA";
+      window.cesiumViewer = new Cesium.Viewer("cesiumContainer", {
+        useDefaultRenderLoop: false,
+        animation: false,
+        baseLayerPicker: false,
+        fullscreenButton: false,
+        geocoder: false,
+        homeButton: false,
+        infoBox: false,
+        sceneModePicker: false,
+        selectionIndicator: false,
+        timeline: false,
+        navigationHelpButton: false,
+      });
+      let cp = new Cesium.Cartesian3(
+        -4303414.154026048,
+        -552161.235598733,
+        -4660771.704035539
+      );
+      cesiumViewer.camera.setView({
+        destination: cp,
+        orientation: {
+          heading: 10,
+          pitch: -Cesium.Math.PI_OVER_TWO * 0.5,
+          roll: 0.0,
+        },
+      });
+
+      window.viewer = new Potree.Viewer(
+        document.getElementById("potree_render_area")
+      );
+      window.measure = new Potree.Measure();
+      window.areameasure = new Potree.Measure();
+      window.anglemeasure = new Potree.Measure();
+      window.heightmeasure = new Potree.Measure();
+      window.pointmeasure = new Potree.Measure();
+
+      window.elTitle = $(`
+							<span>
+								<p><img name="action_elevation" src="${Potree.resourcePath}/icons/profile.svg" class="annotation-action-icon"/> Colorir a vegetação por distância</p>
+								Elevation: </t><span id="lblWeightElevation"></span> <div id="sldWeightElevation"></div>&emsp;
+							</span>`);
+
+      window.elTitle2 = $(`
+		<span>
+			<p>Camadas:</p>
+			<ul style="list-style-type:none;>
+				<li><input id="1" type="checkbox" checked/>  </li>
+				<li><input id="10" type="checkbox" checked/>  Construções</li>
+				<li><input id="2" type="checkbox" checked/>  Cabos </li>
+				<li><input id="3" type="checkbox" checked/>  Solo</li>
+				<li><input id="4" type="checkbox" checked/>  Vegetação Alta</li>
+				<li><input id="5" type="checkbox" checked/>  Objetos feitos por umanos</li>
+				<li><input id="6" type="checkbox" checked/>  Isoladores</li>
+				<li><input id="7" type="checkbox" checked/>  Ruas/Estradad</li>
+				<li><input id="8" type="checkbox" checked/>  Torres</li>
+				<li><input id="9" type="checkbox" checked/>  Não Classificado</li>
+			</ul>
+		</span>`);
+
+      viewer.setEDLEnabled(true);
+      viewer.setFOV(60);
+      viewer.setPointBudget(1 * 1000 * 1000);
+      document.title = "";
+      viewer.setEDLEnabled(false);
+      viewer.setBackground("none"); // ["skybox", "gradient", "black", "white"];
+      viewer.setDescription(``);
+      viewer.loadSettingsFromURL();
+
+      viewer.loadGUI(() => {
+        viewer.setLanguage("pt");
+        $("#menu_appearance").next().show();
+        $("#menu_tools").next().show();
+        $("#menu_scene").next().show();
+      });
+
+      //Listen to child messages
+      window.addEventListener("message", receiver, false);
+      function receiver(e) {
+        if (event.data.event_id === "move") {
+          if (e.data.target != null) {
+            document.getElementById("frame1").src = e.data.target;
+          }
+          move(e.data.data);
+        }
+        console.log(e.data);
+      }
+
+      document.getElementById("toggleBTN").onclick = toggleVisibility;
+
+      function toggleVisibility() {
+        let textarea = document.getElementById("frame1");
+        let btn = document.getElementById("toggleBTN");
+
+        let isVisible = btn.style.top !== "-45vh";
+
+        if (isVisible) {
+          textarea.style.top = "-50vh";
+          btn.style.top = "-45vh";
+          btn.innerHTML = "v";
+        } else {
+          textarea.style.top = "0";
+          btn.style.top = "3vh";
+          btn.innerHTML = "^";
+        }
+      }
+
+      function move(to) {
+        let duration = 3000;
+        logPosition();
+        let from = getCamCurrentPosition();
+        let camera = viewer.scene.getActiveCamera();
+        tween = new TWEEN.Tween(from)
+          .to(to, duration)
+          .easing(TWEEN.Easing.Linear.None) // TWEEN.Easing.Quadratic.InOut ...
+          .onUpdate(function () {
+            window.viewer.scene.view.position.set(from.x, from.y, from.z);
+            viewer.scene.view.lookAt(from.rx, from.ry, from.rz);
+            //camera.position.set(from.x, from.y, from.z);
+            //camera.rotation.set(from.rx, from.ry, from.rz);
+          })
+          .start();
+      }
+
+      function logPosition() {
+        let camera = viewer.scene.getActiveCamera();
+        let target = window.viewer.scene.view.getPivot();
+        console.log("POSITION X");
+        console.log(camera.position.x);
+        console.log("POSITION Y");
+        console.log(camera.position.y);
+        console.log("POSITION Z");
+        console.log(camera.position.z);
+        console.log("TARGET X");
+        console.log(target.x);
+        console.log("TARGET Y");
+        console.log(target.y);
+        console.log("TARGET Z");
+        console.log(target.z);
+      }
+
+      function getCamCurrentPosition() {
+        let camera = viewer.scene.getActiveCamera();
+        let target = window.viewer.scene.view.getPivot();
+        return {
+          x: camera.position.x,
+          y: camera.position.y,
+          z: camera.position.z,
+          rx: target.x,
+          ry: target.y,
+          rz: target.z,
+        };
+      }
+
+      Potree.loadPointCloud("pointclouds/sebauru/cloud.js", "SE", (e) => {
+        let pointcloud = e.pointcloud;
+        let material = pointcloud.material;
+        viewer.scene.addPointCloud(pointcloud);
+        material.pointColorType = Potree.PointColorType.RGB; // any Potree.PointColorType.XXXX
+        material.size = 1;
+        material.pointSizeType = Potree.PointSizeType.ADAPTIVE;
+        material.shape = Potree.PointShape.SQUARE;
+        {
+          // {
+          //   //Bauru
+          //   let bauru = new Potree.Annotation({
+          //     position: [696358.493, 7534653.831, 7.1144],
+          //     cameraPosition: [696578.786, 7534352.809, 334.145],
+          //     cameraTarget: [696333.273, 7534598.322, -13.063],
+          //     title: "Bauru",
+          //   });
+          //   viewer.scene.annotations.add(bauru);
+          //   //Bauru
+          //   let seBauru = new Potree.Annotation({
+          //     position: [696150, 7534622, 6.54],
+          //     cameraPosition: [696584.05, 7534618.77, 195.3],
+          //     cameraTarget: [696121.76, 7534682.63, -196.22],
+          //     title: "SE Bauru",
+          //     description: `
+          // 	Para melhor visualização os comentários são agrupados de acordo com o nível de zoom
+          // 	`,
+          //   });
+          //   bauru.add(seBauru);
+          //   //Anotação do trafo
+          //   let trafo = new Potree.Annotation({
+          //     position: [696076.25, 7534399.61, 12.09],
+          //     cameraPosition: [696076.76, 7534386.03, 26.27],
+          //     cameraTarget: [696080.58, 7534531.03, -173.61],
+          //     title: "Transformador",
+          //     description: `
+          // 	Exemplo de como é possível focar em um local específico da nuvem de pontos<br><br>
+          // 	A Câmera é posicionada na posição pré-definida quando a anotação é clicada
+          // 	`,
+          //   });
+          //   seBauru.add(trafo);
+          //   //linear measure
+          //   measure.closed = false;
+          //   measure.addMarker(new THREE.Vector3(695995.33, 7534585.47, 29.25));
+          //   measure.addMarker(new THREE.Vector3(696015.23, 7534599.06, 29.19));
+          //   measure.addMarker(new THREE.Vector3(696035.48, 7534612.19, 29.07));
+          //   measure.visible = false;
+          //   viewer.scene.addMeasurement(measure);
+          //   //Anotação da medida
+          //   let dist = new Potree.Annotation({
+          //     position: [696017.04, 7534595.28, 6.97],
+          //     cameraPosition: [696045.52, 7534582.68, 44.77],
+          //     cameraTarget: [696012.95, 7534602.79, 15.1],
+          //     title: "Medida de distância",
+          //     description: `
+          // 	Exemplo de medida de distância usando a respectiva ferramenta no menu lateral
+          // 	`,
+          //   });
+          //   seBauru.add(dist);
+          //   //area measure
+          //   areameasure.closed = true;
+          //   areameasure.showArea = true;
+          //   areameasure.addMarker(
+          //     new THREE.Vector3(
+          //       696177.572220087,
+          //       7534768.573760033,
+          //       7.898006401062048
+          //     )
+          //   );
+          //   areameasure.addMarker(
+          //     new THREE.Vector3(
+          //       696221.7415008545,
+          //       7534797.531759262,
+          //       8.201005897522009
+          //     )
+          //   );
+          //   areameasure.addMarker(
+          //     new THREE.Vector3(
+          //       696252.8633444309,
+          //       7534749.388478994,
+          //       7.607006511688269
+          //     )
+          //   );
+          //   areameasure.addMarker(
+          //     new THREE.Vector3(
+          //       696208.8495006561,
+          //       7534720.749507904,
+          //       7.329006156921423
+          //     )
+          //   );
+          //   areameasure.visible = false;
+          //   viewer.scene.addMeasurement(areameasure);
+          //   //Anotação da medida
+          //   let areaanot = new Potree.Annotation({
+          //     position: [696194.54, 7534792.64, 8.14],
+          //     cameraPosition: [696246.23, 7534711.65, 83.672],
+          //     cameraTarget: [696180.257, 7534829.19, -136.889],
+          //     title: "Medida de Área",
+          //     description: `
+          // 	Exemplo de medida de área usando a respectiva ferramenta no menu lateral
+          // 	`,
+          //   });
+          //   seBauru.add(areaanot);
+          //   //angle measure
+          //   anglemeasure.closed = true;
+          //   anglemeasure.showAngles = true;
+          //   anglemeasure.showDistances = false;
+          //   anglemeasure.addMarker(
+          //     new THREE.Vector3(
+          //       696307.1819059849,
+          //       7534512.439105749,
+          //       6.338006458282507
+          //     )
+          //   );
+          //   anglemeasure.addMarker(
+          //     new THREE.Vector3(
+          //       696326.9361872673,
+          //       7534525.357387066,
+          //       6.2510065650940305
+          //     )
+          //   );
+          //   anglemeasure.addMarker(
+          //     new THREE.Vector3(
+          //       696300.2046251297,
+          //       7534522.365387108,
+          //       6.168006381988562
+          //     )
+          //   );
+          //   anglemeasure.visible = false;
+          //   viewer.scene.addMeasurement(anglemeasure);
+          //   //Anotação da medida
+          //   let angleanot = new Potree.Annotation({
+          //     position: [
+          //       696315.5331878662,
+          //       7534528.3323869705,
+          //       6.232006511688269,
+          //     ],
+          //     cameraPosition: [696316.252, 7534517.345, 36.542],
+          //     cameraTarget: [696288.238, 7534560.743, -274.919],
+          //     title: "Medida de Ângulo",
+          //     description: `
+          // 	Exemplo de medida de ângulo usando a respectiva ferramenta no menu lateral
+          // 	`,
+          //   });
+          //   seBauru.add(angleanot);
+          //   //height measure
+          //   heightmeasure.closed = false;
+          //   heightmeasure.showDistances = false;
+          //   heightmeasure.showHeight = true;
+          //   heightmeasure.addMarker(
+          //     new THREE.Vector3(
+          //       696277.2576255798,
+          //       7534704.5599172115,
+          //       29.86428757667545
+          //     )
+          //   );
+          //   heightmeasure.addMarker(
+          //     new THREE.Vector3(696285.346, 7534692.029, 7.017)
+          //   );
+          //   heightmeasure.visible = false;
+          //   viewer.scene.addMeasurement(heightmeasure);
+          //   //Anotação da medida
+          //   let heightanot = new Potree.Annotation({
+          //     position: [
+          //       696286.499625206,
+          //       7534705.169916868,
+          //       7.1860065078735715,
+          //     ],
+          //     cameraPosition: [696255.047, 7534680.172, 38.26],
+          //     cameraTarget: [696346.589, 7534785.733, -53.152],
+          //     title: "Medida de altura",
+          //     description: `
+          // 	Exemplo de medida de altura usando a respectiva ferramenta no menu lateral
+          // 	`,
+          //   });
+          //   seBauru.add(heightanot);
+          //   //point measure
+          //   pointmeasure.closed = false;
+          //   pointmeasure.showDistances = false;
+          //   pointmeasure.showCoordinates = true;
+          //   pointmeasure.maxMarkers = 1;
+          //   pointmeasure.addMarker(
+          //     new THREE.Vector3(
+          //       696156.1549391747,
+          //       7534625.235792637,
+          //       20.645287475585974
+          //     )
+          //   );
+          //   pointmeasure.visible = false;
+          //   viewer.scene.addMeasurement(pointmeasure);
+          //   //Anotação da medida
+          //   let pointanot = new Potree.Annotation({
+          //     position: [
+          //       696160.1953763962,
+          //       7534628.505512238,
+          //       6.551006278991736,
+          //     ],
+          //     cameraPosition: [696167.927, 7534605.448, 29.096],
+          //     cameraTarget: [696075.132, 7534783.667, -110.15],
+          //     title: "Propriedades de ponto",
+          //     description: `
+          // 	Exemplo de exibição de propriedades de posicionamento de ponto usando a respectiva ferramenta no menu lateral junto às ferramentas de medida
+          // 	`,
+          //   });
+          //   seBauru.add(pointanot);
+          //   //Bauru
+          //   let treinanot = new Potree.Annotation({
+          //     position: [696623.971, 7534701.212, 13.56],
+          //     cameraPosition: [696532.886, 7534690.907, 101.675],
+          //     cameraTarget: [696605.085, 7534623.962, -39.409],
+          //     title: "Lts de Treinamento",
+          //     description: `
+          // 	Modelo utilizado para demonstrar uma forma de visualização dos resultados obtidos com o processamento de distâncias para detecção de cabo baixo e proximidade da vegetação
+          // 	`,
+          //   });
+          //   bauru.add(treinanot);
+          //   {
+          //     // Annotation painel de configurações
+          //     // Create title element with jquery
+          //     elTitle = $(`
+          // 		<span>
+          // 			<p>Vegetação - Painel de configuração</p>
+          // 			<p><img name="action_elevation" src="${Potree.resourcePath}/icons/profile.svg" class="annotation-action-icon"/>
+          // 			<img name="action_rgb" src="${Potree.resourcePath}/icons/rgb.svg" class="annotation-action-icon"/></p>
+          // 			<div id="distanceframe">Distância ao Cabo:  </t><span id="lblWeightElevation"></span> <div id="sldWeightElevation"></div></div>
+          // 		</span>`);
+          //     elTitle.find("img[name=action_elevation]").click(() => {
+          //       let targetPointCloud = viewer.scene.pointclouds.filter(
+          //         (pc) => pc.name == "High Vegetation"
+          //       );
+          //       targetPointCloud[0].material.pointColorType =
+          //         Potree.PointColorType.INTENSITY;
+          //     });
+          //     elTitle.find("img[name=action_rgb]").click(() => {
+          //       let targetPointCloud = viewer.scene.pointclouds.filter(
+          //         (pc) => pc.name == "High Vegetation"
+          //       );
+          //       targetPointCloud[0].material.pointColorType =
+          //         Potree.PointColorType.RGB;
+          //     });
+          //     elTitle.find("#sldWeightElevation").slider({
+          //       value: 0,
+          //       min: 0,
+          //       max: 100,
+          //       step: 0.01,
+          //       slide: (event, ui) => {
+          //         let targetPointCloud = viewer.scene.pointclouds.filter(
+          //           (pc) => pc.name == "High Vegetation"
+          //         );
+          //         targetPointCloud[0].material.intensityGamma = ui.value;
+          //       },
+          //     });
+          //     // Give the annotation a meaningful string representation for the sidebar
+          //     elTitle.toString = () => "Elevation / RGB Actions";
+          //     // Same as with other annotations, except title is a jquery object this time.
+          //     let aActions = new Potree.Annotation({
+          //       position: [696586.695, 7534699.966, 6.675],
+          //       title: elTitle,
+          //     });
+          //     treinanot.add(aActions);
+          //   }
+          //   {
+          //     // Annotation layers
+          //     // Create title element with jquery
+          //     elTitle2.find("img[name=action_rgb]").click(() => {
+          //       let targetPointCloud = viewer.scene.pointclouds.filter(
+          //         (pc) => pc.name == "High Vegetation"
+          //       );
+          //       targetPointCloud[0].material.pointColorType =
+          //         Potree.PointColorType.RGB;
+          //     });
+          //     let elInput = elTitle2.find("input");
+          //     let a = (key, value) => {
+          //       let targetPointCloud;
+          //       if (key == 10) {
+          //         //construções
+          //         targetPointCloud = viewer.scene.pointclouds.filter(
+          //           (pc) => pc.name == "building"
+          //         );
+          //       }
+          //       if (key == 2) {
+          //         //cabos
+          //         targetPointCloud = viewer.scene.pointclouds.filter(
+          //           (pc) => pc.name == "cables"
+          //         );
+          //       }
+          //       if (key == 3) {
+          //         //solo
+          //         targetPointCloud = viewer.scene.pointclouds.filter(
+          //           (pc) => pc.name == "Ground"
+          //         );
+          //       }
+          //       if (key == 4) {
+          //         //vegetação
+          //         targetPointCloud = viewer.scene.pointclouds.filter(
+          //           (pc) => pc.name == "High Vegetation"
+          //         );
+          //       }
+          //       if (key == 5) {
+          //         //objs
+          //         targetPointCloud = viewer.scene.pointclouds.filter(
+          //           (pc) => pc.name == "Human Made Objects"
+          //         );
+          //       }
+          //       if (key == 6) {
+          //         //isoladores
+          //         targetPointCloud = viewer.scene.pointclouds.filter(
+          //           (pc) => pc.name == "Insulator"
+          //         );
+          //       }
+          //       if (key == 7) {
+          //         //ruas
+          //         targetPointCloud = viewer.scene.pointclouds.filter(
+          //           (pc) => pc.name == "Road"
+          //         );
+          //       }
+          //       if (key == 8) {
+          //         //torres
+          //         targetPointCloud = viewer.scene.pointclouds.filter(
+          //           (pc) => pc.name == "Tower"
+          //         );
+          //       }
+          //       if (key == 9) {
+          //         //na~class
+          //         targetPointCloud = viewer.scene.pointclouds.filter(
+          //           (pc) => pc.name == "Not Classified"
+          //         );
+          //       }
+          //       targetPointCloud[0].visible = value;
+          //     };
+          //     elInput.click((event) => {
+          //       a(event.target.id, event.target.checked);
+          //     });
+          //     // Give the annotation a meaningful string representation for the sidebar
+          //     elTitle2.toString = () => "Elevation / RGB Actions";
+          //     // Same as with other annotations, except title is a jquery object this time.
+          //     let aActions = new Potree.Annotation({
+          //       position: [696730.646, 7534680.31, 12.812],
+          //       title: elTitle2,
+          //     });
+          //     treinanot.add(aActions);
+          //   }
+          // }
+        }
+        viewer.fitToScreen();
+      });
+      Potree.loadPointCloud(
+        "pointclouds/building/cloud.js",
+        "building",
+        (e) => {
+          let pointcloud = e.pointcloud;
+          let material = pointcloud.material;
+          viewer.scene.addPointCloud(pointcloud);
+          material.pointColorType = Potree.PointColorType.RGB; // any Potree.PointColorType.XXXX
+          material.size = 1;
+          material.pointSizeType = Potree.PointSizeType.ADAPTIVE;
+          material.shape = Potree.PointShape.SQUARE;
+          viewer.fitToScreen();
+        }
+      );
+      Potree.loadPointCloud("pointclouds/cables/cloud.js", "cables", (e) => {
+        let pointcloud = e.pointcloud;
+        let material = pointcloud.material;
+        viewer.scene.addPointCloud(pointcloud);
+        material.pointColorType = Potree.PointColorType.RGB; // any Potree.PointColorType.XXXX
+        material.size = 1;
+        material.pointSizeType = Potree.PointSizeType.ADAPTIVE;
+        material.shape = Potree.PointShape.SQUARE;
+        viewer.fitToScreen();
+      });
+      Potree.loadPointCloud("pointclouds/ground/cloud.js", "Ground", (e) => {
+        let pointcloud = e.pointcloud;
+        let material = pointcloud.material;
+        viewer.scene.addPointCloud(pointcloud);
+        material.pointColorType = Potree.PointColorType.RGB; // any Potree.PointColorType.XXXX
+        material.size = 1;
+        material.pointSizeType = Potree.PointSizeType.ADAPTIVE;
+        material.shape = Potree.PointShape.SQUARE;
+        viewer.fitToScreen();
+      });
+      Potree.loadPointCloud(
+        "pointclouds/highvegetation/cloud.js",
+        "High Vegetation",
+        (e) => {
+          let pointcloud = e.pointcloud;
+          let material = pointcloud.material;
+          viewer.scene.addPointCloud(pointcloud);
+          material.pointColorType = Potree.PointColorType.RGB; // any Potree.PointColorType.XXXX
+          material.size = 1;
+          material.pointSizeType = Potree.PointSizeType.ADAPTIVE;
+          material.shape = Potree.PointShape.SQUARE;
+          viewer.fitToScreen();
+
+          let materialChanged = () => {
+            //panel.find('#sldIntensityGamma').slider({value: gamma});
+            let targetPointCloud = viewer.scene.pointclouds.filter(
+              (pc) => pc.name == "High Vegetation"
+            );
+            if (
+              targetPointCloud[0].material.pointColorType ==
+              Potree.PointColorType.INTENSITY
+            ) {
+              elTitle.find("img[name=action_elevation]").hide();
+              elTitle.find("#distanceframe").show();
+              elTitle
+                .find("#lblWeightElevation")
+                .html(targetPointCloud[0].material.intensityGamma.toFixed(2));
+              elTitle
+                .find("#sldWeightElevation")
+                .slider({ value: targetPointCloud[0].material.intensityGamma });
+            } else {
+              elTitle.find("img[name=action_elevation]").show();
+              elTitle.find("#distanceframe").hide();
+            }
+            if (
+              targetPointCloud[0].material.pointColorType ==
+              Potree.PointColorType.RGB
+            ) {
+              elTitle.find("img[name=action_rgb]").hide();
+            } else {
+              elTitle.find("img[name=action_rgb]").show();
+            }
+          };
+          material.addEventListener(
+            "material_property_changed",
+            materialChanged
+          );
+
+          /* Bar Example
+			{ // Annotation with action icons
+
+				// Create title element with jquery
+				let elTitle = $(`
+					<span>
+						<img name="action_elevation" src="${Potree.resourcePath}/icons/profile.svg" class="annotation-action-icon"/>
+						Elevation: <span id="lblWeightElevation"></span> <div id="sldWeightElevation"></div>
+					</span>`);
+				elTitle.find("img[name=action_elevation]").click( () => {
+					viewer.scene.pointclouds.forEach( pc => pc.material.pointColorType = Potree.PointColorType.ELEVATION );
+				});
+				elTitle.find("#sldWeightElevation").slider({
+				value: 1,
+				min: 0, max: 1, step: 0.01,
+				slide: (event, ui) => {viewer.scene.pointclouds.forEach( pc => pc.material.weightRGB = ui.value )}
+			});
+
+				// Give the annotation a meaningful string representation for the sidebar
+				elTitle.toString = () => "Elevation / RGB Actions";
+
+				// Same as with other annotations, except title is a jquery object this time.
+				let aActions = new Potree.Annotation({
+					position: [696586.695, 7534699.966, 6.675],
+					title: elTitle
+				});
+				viewer.scene.annotations.add(aActions);
+				}*/
+        }
+      );
+      Potree.loadPointCloud(
+        "pointclouds/humanMadeObjects/cloud.js",
+        "Human Made Objects",
+        (e) => {
+          let pointcloud = e.pointcloud;
+          let material = pointcloud.material;
+          viewer.scene.addPointCloud(pointcloud);
+          material.pointColorType = Potree.PointColorType.RGB; // any Potree.PointColorType.XXXX
+          material.size = 1;
+          material.pointSizeType = Potree.PointSizeType.ADAPTIVE;
+          material.shape = Potree.PointShape.SQUARE;
+          viewer.fitToScreen();
+        }
+      );
+      Potree.loadPointCloud(
+        "pointclouds/insulator/cloud.js",
+        "Insulator",
+        (e) => {
+          let pointcloud = e.pointcloud;
+          let material = pointcloud.material;
+          viewer.scene.addPointCloud(pointcloud);
+          material.pointColorType = Potree.PointColorType.RGB; // any Potree.PointColorType.XXXX
+          material.size = 1;
+          material.pointSizeType = Potree.PointSizeType.ADAPTIVE;
+          material.shape = Potree.PointShape.SQUARE;
+          viewer.fitToScreen();
+        }
+      );
+      Potree.loadPointCloud(
+        "pointclouds/notClassified/cloud.js",
+        "Not Classified",
+        (e) => {
+          let pointcloud = e.pointcloud;
+          let material = pointcloud.material;
+          viewer.scene.addPointCloud(pointcloud);
+          material.pointColorType = Potree.PointColorType.RGB; // any Potree.PointColorType.XXXX
+          material.size = 1;
+          material.pointSizeType = Potree.PointSizeType.ADAPTIVE;
+          material.shape = Potree.PointShape.SQUARE;
+          viewer.fitToScreen();
+        }
+      );
+      Potree.loadPointCloud("pointclouds/road/cloud.js", "Road", (e) => {
+        let pointcloud = e.pointcloud;
+        let material = pointcloud.material;
+        viewer.scene.addPointCloud(pointcloud);
+        material.pointColorType = Potree.PointColorType.RGB; // any Potree.PointColorType.XXXX
+        material.size = 1;
+        material.pointSizeType = Potree.PointSizeType.ADAPTIVE;
+        material.shape = Potree.PointShape.SQUARE;
+        viewer.fitToScreen();
+      });
+      Potree.loadPointCloud("pointclouds/tower/cloud.js", "Tower", (e) => {
+        let pointcloud = e.pointcloud;
+        let material = pointcloud.material;
+        viewer.scene.addPointCloud(pointcloud);
+        material.pointColorType = Potree.PointColorType.RGB; // any Potree.PointColorType.XXXX
+        material.size = 1;
+        material.pointSizeType = Potree.PointSizeType.ADAPTIVE;
+        material.shape = Potree.PointShape.SQUARE;
+        viewer.fitToScreen();
+      });
+
+      let pointcloudProjection =
+        "+proj=utm +zone=22  +south +ellps=WGS84 +datum=WGS84 +units=m +no_defs";
+      let mapProjection = proj4.defs("WGS84");
+
+      window.toMap = proj4(pointcloudProjection, mapProjection);
+      window.toScene = proj4(mapProjection, pointcloudProjection);
+
+      {
+        let bb = viewer.getBoundingBox();
+
+        let minWGS84 = proj4(
+          pointcloudProjection,
+          mapProjection,
+          bb.min.toArray()
+        );
+        let maxWGS84 = proj4(
+          pointcloudProjection,
+          mapProjection,
+          bb.max.toArray()
+        );
+      }
+
+      function loop(timestamp) {
+        requestAnimationFrame(loop);
+
+        viewer.update(viewer.clock.getDelta(), timestamp);
+
+        viewer.render();
+
+        var cameraPos = window.viewer.scene.view.position;
+        //linear
+        var distance = cameraPos.distanceTo(
+          new THREE.Vector3(696015.23, 7534599.06, 29.19)
+        );
+        if (distance < 125) {
+          measure.visible = true;
+        } else {
+          measure.visible = false;
+        }
+
+        let bla = window.viewer.scene.pointclouds;
+
+        //area
+        distance = cameraPos.distanceTo(
+          new THREE.Vector3(696213.463, 7534756.635, 19.908)
+        );
+        if (distance < 125) {
+          areameasure.visible = true;
+        } else {
+          areameasure.visible = false;
+        }
+
+        //angle
+        distance = cameraPos.distanceTo(
+          new THREE.Vector3(696304.216, 7534517.76, 6.124)
+        );
+        if (distance < 65) {
+          anglemeasure.visible = true;
+        } else {
+          anglemeasure.visible = false;
+        }
+
+        //height
+        distance = cameraPos.distanceTo(
+          new THREE.Vector3(696272.435, 7534701.507, 7.091)
+        );
+        if (distance < 80) {
+          heightmeasure.visible = true;
+        } else {
+          heightmeasure.visible = false;
+        }
+
+        //point
+        distance = cameraPos.distanceTo(
+          new THREE.Vector3(696161.786, 7534624.029, 6.513)
+        );
+        if (distance < 40) {
+          pointmeasure.visible = true;
+        } else {
+          pointmeasure.visible = false;
+        }
+
+        if (window.toMap !== undefined) {
+          {
+            let camera = viewer.scene.getActiveCamera();
+
+            let pPos = new THREE.Vector3(0, 0, 0).applyMatrix4(
+              camera.matrixWorld
+            );
+            let pRight = new THREE.Vector3(600, 0, 0).applyMatrix4(
+              camera.matrixWorld
+            );
+            let pUp = new THREE.Vector3(0, 600, 0).applyMatrix4(
+              camera.matrixWorld
+            );
+            let pTarget = viewer.scene.view.getPivot();
+
+            let toCes = (pos) => {
+              let xy = [pos.x, pos.y];
+              let height = pos.z;
+              let deg = toMap.forward(xy);
+              let cPos = Cesium.Cartesian3.fromDegrees(...deg, height);
+
+              return cPos;
+            };
+
+            let cPos = toCes(pPos);
+            let cUpTarget = toCes(pUp);
+            let cTarget = toCes(pTarget);
+
+            let cDir = Cesium.Cartesian3.subtract(
+              cTarget,
+              cPos,
+              new Cesium.Cartesian3()
+            );
+            let cUp = Cesium.Cartesian3.subtract(
+              cUpTarget,
+              cPos,
+              new Cesium.Cartesian3()
+            );
+
+            cDir = Cesium.Cartesian3.normalize(cDir, new Cesium.Cartesian3());
+            cUp = Cesium.Cartesian3.normalize(cUp, new Cesium.Cartesian3());
+
+            cesiumViewer.camera.setView({
+              destination: cPos,
+              orientation: {
+                direction: cDir,
+                up: cUp,
+              },
+            });
+          }
+
+          let aspect = viewer.scene.getActiveCamera().aspect;
+          if (aspect < 1) {
+            let fovy = Math.PI * (viewer.scene.getActiveCamera().fov / 180);
+            cesiumViewer.camera.frustum.fov = fovy;
+          } else {
+            let fovy = Math.PI * (viewer.scene.getActiveCamera().fov / 180);
+            let fovx = Math.atan(Math.tan(0.5 * fovy) * aspect) * 2;
+            cesiumViewer.camera.frustum.fov = fovx;
+          }
+        }
+
+        cesiumViewer.render();
+      }
+
+      requestAnimationFrame(loop);
+    </script>
+  </body>
+</html>

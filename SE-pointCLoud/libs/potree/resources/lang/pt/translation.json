@@ -1,0 +1,69 @@
+﻿{
+    "tb": {
+        "navigation_opt": "Navegação",
+        "rendering_opt": "Aparência",
+        "tools_opt": "Ferramentas",
+        "measurments_opt": "Medidas",
+        "clipping_opt": "Clipping",
+        "materials_opt": "Materiais",
+        "scene_opt": "Cena",
+        "classification_filter_opt": "Filtro de Classificação",
+        "parameters_opt": "Configurações adicionais",
+        "about_opt": "Sobre"
+    },
+    "tt": {
+        "angle_measurement": "Medida de Ângulo",
+        "distance_measurement": "Medida de Distância",
+        "area_measurement": "Medida de Área",
+        "volume_measurement": "Medida de Volume",
+        "height_profile": "Perfil de Altura",
+        "clip_volume": "Corte por Volume",
+        "clip_polygon": "Corte por Polígono",
+        "clip_plane_x": "Plano de corte - eixo x",
+        "clip_plane_y": "Plano de corte - eixo y",
+        "clip_plane_z": "Plano de corte - eixo z",
+        "remove_all_measurement": "Excluir todas as medições",
+        "left_view_control": "Vista lateral esquerda",
+        "front_view_control": "Vista frontal",
+        "top_view_control": "Vista superior",
+        "focus_control": "Controle de foco",
+        "orbit_control": "Controle de órbita",
+        "flight_control": "Controle de voo",
+        "earth_control": "Controle de ambiente",
+        "perspective_camera_control": "Visão perspectiva",
+        "orthographic_camera_control": "Visão Ortográfica",
+        "navigation_cube_control": "Cubo de navegação",
+        "remove_all_clipping_volumes": "Excluir todos volumes de corte"
+    },
+    "appearance": {
+        "nb_max_pts": "Número max. de pontos", 
+        "point_size": "Tamanho do ponto",
+        "point_opacity": "Opacidade",
+        "field_view": "Campo de Visão",
+        "point_size_type": "Tamanho do ponto",
+        "point_material": "Material",
+        "elevation_range": "Intervalo de elevação",
+        "point_quality": "Qualidade",
+		"point_shape": "Forma do ponto",
+        "edl_radius": "Espessura",
+        "edl_strength": "Intensidade",
+        "edl_enable": "Ativado",
+        "min_node_size": "Tamanho mínimo",
+        "clip_mode": "Modo de Corte",
+        "move_speed": "Velocidade",
+        "skybox": "Céu",
+        "bottom_lock": "Fixar ao nível do solo",
+        "box": "Exibir Blocos",
+        "length_unit": "Unidade de Comprimento",
+        "freeze": "Congelar",
+        "language": "Idioma"
+    },
+    "profile": {
+        "nb_points": "Número de pontos",
+        "title": "Nome",
+        "save": "Salvar"
+    },
+    "settings": {
+        "language": "Idioma"
+    }
+}
