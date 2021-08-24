@@ -29,12 +29,11 @@
       type="text/css"
       href="libs/jstree/themes/mixed/style.css"
     />
-    <link
-      rel="stylesheet"
-      type="text/css"
-      href="https://cesiumjs.org/releases/1.57/Build/Cesium/Widgets/widgets.css"
-    />
+     <script src="https://cesium.com/downloads/cesiumjs/releases/1.84/Build/Cesium/Cesium.js"></script>
+
+  <link href="https://cesium.com/downloads/cesiumjs/releases/1.84/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="sprite_30fs.css" />
+    
   </head>
 
   <body>
@@ -52,7 +51,7 @@
     <script src="libs/jstree/jstree.js"></script>
     <script src="libs/potree/potree.js"></script>
     <script src="libs/plasio/js/laslaz.js"></script>
-    <script src="https://cesiumjs.org/releases/1.57/Build/Cesium/Cesium.js"></script>
+    <!-- <script src="libs/Cesium/Cesium.js" charset="UTF-8"></script> -->
     <script src="libs/other/PLYLoader.js"></script>
     <script src="libs/other/OBJLoader.js"></script>
 
@@ -81,8 +80,7 @@
 
     <script>
       // ----- MAP CONFIGURATION
-      Cesium.Ion.defaultAccessToken =
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIwZDQ4MmY3My1mNzU1LTRlMDYtOWNjYS0yMmJkNWQ2ZWMwMzYiLCJpZCI6MTExOTMsInNjb3BlcyI6WyJhc3IiLCJnYyJdLCJpYXQiOjE1NTgzODc0NzN9.wVOpLrzpAd_3HNbJstWuTOxSSoTj5e4e6gGEAWSOxCA";
+      Cesium.Ion.defaultAccessToken ="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIwZDQ4MmY3My1mNzU1LTRlMDYtOWNjYS0yMmJkNWQ2ZWMwMzYiLCJpZCI6MTExOTMsInNjb3BlcyI6WyJhc3IiLCJnYyJdLCJpYXQiOjE1NTgzODc0NzN9.wVOpLrzpAd_3HNbJstWuTOxSSoTj5e4e6gGEAWSOxCA";
       window.cesiumViewer = new Cesium.Viewer("cesiumContainer", {
         useDefaultRenderLoop: false,
         animation: false,
